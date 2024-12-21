@@ -1,11 +1,16 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import ScreenWrapper from '../components/ScreenWrapper'
+import { theme } from '../constants/theme'
+import Icon from '../assets/icons/index.jsx'
 
 const Login = () => {
   return (
-    <View>
+    <ScreenWrapper>
       <Text>Login</Text>
-    </View>
+      {/* <Home strokeWidth ={2} color={theme.colors.primary}/> */}
+      <Icon name = "home" color ={theme.colors.primary} strokeWidth ={2}/>
+    </ScreenWrapper>
   )
 }
 

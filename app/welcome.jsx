@@ -7,7 +7,8 @@ import { Image } from 'react-native'
 import { theme } from '../constants/theme.js'
 import Button from '../components/Button.jsx'
 import { useRouter } from 'expo-router'
-
+import Login from './login.jsx'
+import SignUp from './SignUp.jsx'
 const welcome = () => {
   const router = useRouter();
   return (
