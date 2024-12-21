@@ -4,32 +4,33 @@ import { theme } from '../constants/theme'
 import { hp } from '../helpers/common'
 import Loading from './Loading'
 
+
 const Button = ({
-    buttonStyle, // Style for the button container
-    textStyle,   // Style for the button text
-    title = "",  // Default title for the button
-    onPress = () => {}, // Function to be called on button press
-    loading = true,    // Whether the button is currently loading
-    hasShadow = true,   //! Whether to display a shadow effect or not toggel karneke kam ayga 
+  buttonStyle, // Style for the button container
+  textStyle,   // Style for the button text
+  title = '',  // Default title for the button
+  onPress = () => { }, // Function to be called on button press
+  hasShadow = false,   // Whether to display a shadow effect or not toggel karneke kam ayga 
+  loading = false,    // Whether the button is currently loading
 }) => {
-    const shadowStyle = {
-        shadowColor: theme.colors.dark,  // Color of the shadow
-        shadowOffset: { width: 0, height: 10 }, // Offset of the shadow
-        shadowOpacity: 0.2, // Opacity of the shadow
-        shadowRadius: 8, // Blur radius of the shadow
-        elevation: 4, // Elevation for Android shadow
-      };
-      if (loading) {
-        return (
-          <View style={[styles.button, buttonStyle, { backgroundColor: 'white' }]} >
-            <Loading />
-                </View>
-        )
-      }
+  const shadowStyle = {
+    shadowColor: theme.colors.dark,  // Color of the shadow
+    shadowOffset: { width: 0, height: 10 }, // Offset of the shadow
+    shadowOpacity: 0.2, // Opacity of the shadow
+    shadowRadius: 8, // Blur radius of the shadow
+    elevation: 4, // Elevation for Android shadow
+  };
+  if (loading) {
+    return (
+      <View style={[styles.button, buttonStyle, { backgroundColor: 'white' }]} >
+        <Loading/>
+      </View>
+    )
+  }
   return (
-    
-    <Pressable onPress={onPress} style={[styles.button, buttonStyle,hasShadow && shadowStyle]}>
-         {/* 
+
+    <Pressable onPress={onPress} style={[styles.button, buttonStyle, hasShadow && shadowStyle]}>
+      {/* 
     - **onPress={onPress}**: This prop defines the function that will be called when the button is pressed. 
       In this case, it's the `onPress` prop passed to the `Button` component. 
       This allows you to handle the button press event and perform actions like navigating to another screen, 
@@ -51,8 +52,8 @@ const Button = ({
         - **textStyle**: Custom text styles passed through the `textStyle` prop.
       - **{title}**: The actual text content of the button, which is passed to the component through the `title` prop. 
   */}
-        {/* here below title is passes by parent compponnet which is in welcome line  */}
-      <Text style={[styles.text,textStyle]}>{title}</Text>
+      {/* here below title is passes by parent compponnet which is in welcome line  */}
+      <Text style={[styles.text, textStyle]}>{title}</Text>
 
     </Pressable>
   )
@@ -62,18 +63,18 @@ export default Button
 
 const styles = StyleSheet.create({
 
-    button: {
-        backgroundColor: theme.colors.primary,
-        height: hp(6.6),
-        justifyContent: 'center',
-        alignItems: 'center',
-        borderCurve: 'continuous',
-        borderRadius: theme.radius.xl
-      },
-      
-      text: {
-        fontSize: hp(2.5),
-        color: 'white',
-        fontWeight: theme.fonts.bold
-      },
+  button: {
+    backgroundColor: theme.colors.primary,
+    height: hp(6.6),
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderCurve: 'continuous',
+    borderRadius: theme.radius.xl
+  },
+
+  text: {
+    fontSize: hp(2.5),
+    color: 'white',
+    fontWeight: theme.fonts.bold
+  },
 })
