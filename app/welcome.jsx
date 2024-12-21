@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar'
 import { hp, wp } from '../helpers/common'
 import { Image } from 'react-native'
 import { theme } from '../constants/theme.js'
+import Button from '../components/Button.jsx'
 
 const welcome = () => {
   return (
@@ -21,7 +22,13 @@ const welcome = () => {
           {/* yahan se footer start hoga  */}
           <View style = {styles.footer}>
             {/* now wwe will make button.jsx inside component jisme apan getstarted wala butoton ka kam karenge  */}
-
+          <View style={styles.footer}>
+          <Button
+          title="Getting Started"
+          buttonStyle={{marginHorizontal: wp(3)}}
+          onPress={()=>{}}
+          ></Button>
+          </View>
 
           </View>
       </View>
@@ -63,4 +70,8 @@ const styles = StyleSheet.create({
     fontSize: hp(1.7),
     color: theme.colors.text,
   },
+  footer: {
+    gap: 30,
+    width:'100%',
+  }
 })
