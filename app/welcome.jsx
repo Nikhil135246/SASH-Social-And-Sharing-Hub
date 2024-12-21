@@ -2,16 +2,29 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import ScreenWrapper from '../components/ScreenWrapper.jsx'
 import { StatusBar } from 'expo-status-bar'
-import { wp } from '../helpers/common.js'
-import { Image } from 'react-native-web'
+import { hp, wp } from '../helpers/common'
+import { Image } from 'react-native'
+import { theme } from '../constants/theme.js'
 
 const welcome = () => {
   return (
     <ScreenWrapper bg="white">
-        <StatusBar style="dark"/>
-        <View style={styles.container}>
-        <Image style={styles.welcomeImage} resizeMode ='contain' source={require('../assets/images/welcome.png')}/>   
-        </View>
+      <StatusBar style="dark" />
+      <View style={styles.container}>
+        <Image style={styles.welcomeImage} resizeMode='contain' source={require('../assets/images/welcome.png')} />
+        {/* titel */}
+        <View style = {{gap:20}}>
+          <Text style = {styles.title}>LinkUp!</Text>
+          {/* <Text style={styles.punchline}>Stay in the loop, share your world, and connect authentically.</Text> */}
+          <Text style={styles.punchline}>Where your voice is valued, and every connection feels authentic and true.</Text>
+          </View>
+          {/* yahan se footer start hoga  */}
+          <View style = {styles.footer}>
+            {/* now wwe will make button.jsx inside component jisme apan getstarted wala butoton ka kam karenge  */}
+
+
+          </View>
+      </View>
 
     </ScreenWrapper>
   )
@@ -21,11 +34,33 @@ export default welcome
 
 const styles = StyleSheet.create({
 
-    container: {
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        backgroundColor: 'white',
-        paddingHorizontal: wp(4),
-      }
+  container: {
+    flex: 1,
+    justifyContent: 'space-around',
+    backgroundColor: 'white',
+    alignItems: 'center',
+    paddingHorizontal: wp(4),
+  },
+  welcomeImage: {
+    // Set the height of the image to 30% of the device height
+    height: hp(35),
+
+    // Set the width of the image to 100% of the device width
+    width: wp(100),
+
+    // Center the image within its parent container
+    alignSelf: 'center',
+  },
+  title: {
+    color: theme.colors.text,
+    fontSize: hp(4),
+    textAlign: 'center',
+    fontWeight: theme.fonts.extraBold,
+  },
+  punchline: {
+    textAlign: 'center',
+    paddingHorizontal: wp(10),
+    fontSize: hp(1.7),
+    color: theme.colors.text,
+  },
 })
