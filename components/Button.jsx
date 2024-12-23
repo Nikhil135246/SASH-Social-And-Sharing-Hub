@@ -10,7 +10,7 @@ const Button = ({
   textStyle,   // Style for the button text
   title = '',  // Default title for the button
   onPress = () => { }, // Function to be called on button press
-  hasShadow = false,   // Whether to display a shadow effect or not toggel karneke kam ayga 
+  hasShadow = true,   // Whether to display a shadow effect or not toggel karneke kam ayga 
   loading = false,    // Whether the button is currently loading
 }) => {
   const shadowStyle = {
