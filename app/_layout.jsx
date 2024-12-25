@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { Stack ,useRouter} from 'expo-router';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
+import { getUserData } from '../services/userService';
 
 
 
@@ -15,7 +16,7 @@ const _layout = ()=>
   )
 }
 const MainLayout = () => {
-  const {setAuth} = useAuth();
+  const {setAuth,setUserData} = useAuth();
   const router = useRouter();
 
   useEffect(()=>{
@@ -30,6 +31,7 @@ const MainLayout = () => {
       if(session)//agar session ture h yani user login h tho home me jane bol sakte ha 
       {
         setAuth(session?.user);
+        updateUserData(session?.user);  
         router.replace('main/home');// we willl replace current route so u user cannot go back to welcome page again 
         //first set auth is user ke liye 
         // move to home screen f
@@ -43,7 +45,13 @@ const MainLayout = () => {
       };
     });
     // return () => unsubscribe(); 
-  },[])//need to add this empty array very neccessary , for dependences , warna glitch hoga 
+  },[]);//need to add this empty array very neccessary , for dependences , warna glitch hoga 
+
+  const updateUserData = async(user)=>{
+    let res = await getUserData(user?.id);
+    console.log('got users data: ',res); // this shows yes we successfuly got the datas (name,bio,image,phoneno ...)
+    if(res.success) setUserData(res.data);
+  }
   return (
     <Stack
       screenOptions={{
