@@ -8,6 +8,7 @@ import { hp, wp } from '../../helpers/common';
 import { theme } from '../../constants/theme';
 import Icon from '../../assets/icons';
 import { useRouter } from 'expo-router';
+import { Avatar } from '../../components/Avatar';
 
 const Home = () => {
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
@@ -50,7 +51,14 @@ const Home = () => {
               <Icon name = "plus" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
             </Pressable>
             <Pressable onPress={()=> router.push('profile')}>
-              <Icon name = "user" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
+              {/* <Icon name = "user" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
+               */}
+               <Avatar
+               uri={user?.image}
+               size={hp(4.3)}
+               rounded={theme.radius.sm}
+               style={{borderWidth: 2}}
+               />
             </Pressable>
           </View>
         </View>
