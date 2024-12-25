@@ -1,14 +1,30 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-
-const Avatar = () => {
-  return (
-    <View>
-      <Text>Avatar</Text>
-    </View>
-  )
+import { hp } from '../helpers/common'
+import { theme } from '../constants/theme'
+import Image from 'expo-image'
+import { getUserImageSrc } from '../services/imageservice.jsx'
+const Avatar = ({
+    uri,
+    size = hp(4.5),
+    rounded = theme.radius.md,
+    style = {}
+}) => {
+    return (
+        <Image
+            source={getUserImageSrc(uri)}
+            transition={100}//100 milisec
+            style={[style.avatar, { height: size, width: size, borderRadius: rounded }, style]}
+        />
+    )
 }
 
 export default Avatar
 
-const styles = StyleSheet.create({})
+const styles = StyleSheet.create({
+    avatar:{
+        borderCurve: "continuous",
+        borderColor: theme.colors.darkLight,
+        borderWidth: 1
+    }
+})
