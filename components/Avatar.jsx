@@ -2,19 +2,20 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { hp } from '../helpers/common'
 import { theme } from '../constants/theme'
-import Image from 'expo-image'
-import { getUserImageSrc } from '../services/imageservice.jsx'
+import {Image} from 'expo-image';
+import { getUserImageSrc } from '../services/imageService';
+
 const Avatar = ({
     uri,
     size = hp(4.5),
     rounded = theme.radius.md,
     style = {}
 }) => {
-    return (
+    return ( 
         <Image
             source={getUserImageSrc(uri)}
             transition={100}//100 milisec
-            style={[style.avatar, { height: size, width: size, borderRadius: rounded }, style]}
+            style={[styles.avatar, { height: size, width: size, borderRadius: rounded }, style]}
         />
     )
 }
@@ -26,5 +27,19 @@ const styles = StyleSheet.create({
         borderCurve: "continuous",
         borderColor: theme.colors.darkLight,
         borderWidth: 1
-    }
+    },
 })
+// import { StyleSheet, Text, View } from 'react-native'
+// import React from 'react'
+
+// const Avatar = () => {
+//   return (
+//     <View>
+//       <Text>Avatar</Text>
+//     </View>
+//   )
+// }
+
+// export default Avatar
+
+// const styles = StyleSheet.create({})
