@@ -8,7 +8,7 @@ import { hp, wp } from '../../helpers/common';
 import { theme } from '../../constants/theme';
 import Icon from '../../assets/icons';
 import { useRouter } from 'expo-router';
-import { Avatar } from '../../components/Avatar';
+import  Avatar  from '../../components/Avatar';
 
 const Home = () => {
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
@@ -41,24 +41,24 @@ const Home = () => {
     <ScreenWrapper>
       <View style={styles.container}>
         {/* header */}
-        <View style = {styles.header}>
+        <View style={styles.header}>
           <Text style={styles.title}>SimpleHub</Text>
           <View style={styles.icons}>
-            <Pressable onPress={()=> router.push('notifications')}>
-              <Icon name = "heart" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
+            <Pressable onPress={() => router.push('notifications')}>
+              <Icon name="heart" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
-            <Pressable onPress={()=> router.push('newPost')}>
-              <Icon name = "plus" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
+            <Pressable onPress={() => router.push('newPost')}>
+              <Icon name="plus" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
-            <Pressable onPress={()=> router.push('profile')}>
-              {/* <Icon name = "user" size = {hp(3.2)} strokeWidth ={2} color={theme.colors.text}/>
-               */}
-               <Avatar
-               uri={user?.image}
-               size={hp(4.3)}
-               rounded={theme.radius.sm}
-               style={{borderWidth: 2}}
-               />
+            <Pressable onPress={() => router.push('profile')}>
+
+              
+              <Avatar 
+                uri={user?.image}
+                size={hp(4.3)}
+                rounded={theme.radius.sm}
+                style={{ borderWidth: 2 }}
+              />
             </Pressable>
           </View>
         </View>
@@ -73,33 +73,33 @@ export default Home
 
 const styles = StyleSheet.create({
   container: {
-      flex: 1,
-      // paddingHorizontal: wp(4)
+    flex: 1,
+    // paddingHorizontal: wp(4)
   },
   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 10,
-      marginHorizontal: wp(4)
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+    marginHorizontal: wp(4)
   },
   title: {
-      color: theme.colors.text,
-      fontSize: hp(3.2),
-      fontWeight: theme.fonts.bold
+    color: theme.colors.text,
+    fontSize: hp(3.2),
+    fontWeight: theme.fonts.bold
   },
   avatarImage: {
-      height: hp(4.3),
-      width: hp(4.3),
-      borderRadius: theme.radius.sm,
-      borderCurve: 'continuous',
-      borderColor: theme.colors.gray,
-      borderWidth: 3
+    height: hp(4.3),
+    width: hp(4.3),
+    borderRadius: theme.radius.sm,
+    borderCurve: 'continuous',
+    borderColor: theme.colors.gray,
+    borderWidth: 3
   },
-  icons:{
-    flexDirection:"row",
+  icons: {
+    flexDirection: "row",
     justifyContent: "center",
-    alignItems:"center",
+    alignItems: "center",
     gap: 18
 
   },
