@@ -8,7 +8,7 @@ const Input = (props) => {
     return (
       <View 
         // Combine the default container style with any custom styles provided.
-        style={[styles.container, props.containerStyles && props.containerStyles]}>
+        style={[styles.container, props.containerStyle && props.containerStyle]}>
         {/* Conditionally render an icon if the 'icon' prop is provided. */}
         {props.icon && props.icon} 
   
