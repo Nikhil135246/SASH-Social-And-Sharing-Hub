@@ -10,47 +10,50 @@ import Icon from '../../assets/icons';
 import { useRouter } from 'expo-router';
 import  Avatar  from '../../components/Avatar';
 
+
 const Home = () => {
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
   const router = useRouter();
 
   // Import the useAuth hook (assuming it's defined elsewhere)
-  const { user, setAuth } = useAuth();
+  const { user, setAuth } = useAuth(); 
+  
   console.log('user: ', user);// we can chaeck in home page its not showing all the user data that we have defined in supabase user's table (like name,image ,bio, phone no etc )
   // tho ye karne ke liye we will write a line in _layout.jsx ( updateUserData(session?.user);  )
   // Define an asynchronous function for handling logout
 
-  const onLogout = async () => {
-    // Clear the local authentication state
-    // setAuth(null); no need to setauth null cuase it been already null from that layoutpage 
-    setAuth(null);
-    // Attempt to sign out from Supabase
-    const { error } = await supabase.auth.signOut();
+  // const onLogout = async () => {
+  //   // Clear the local authentication state
+  //   // setAuth(null); no need to setauth null cuase it been already null from that layoutpage 
+  //   setAuth(null);
+  //   // Attempt to sign out from Supabase
+  //   const { error } = await supabase.auth.signOut();
 
-    // Check if there was an error during sign out
-    if (error) {
-      // Display an error alert to the user
-      Alert.alert('Sign out', "Error signing out!");
-    }
-  };
+  //   // Check if there was an error during sign out
+  //   if (error) {
+  //     // Display an error alert to the user
+  //     Alert.alert('Sign out', "Error signing out!");
+  //   }
+  // };
 
 
 
 
   return (
-    <ScreenWrapper>
-      <View style={styles.container}>
+    <ScreenWrapper bg={'white'} paddingTop={'10'}> 
+    {/* above paddding added by sonu , remove it if u want  */}
+      <View style={styles.container} >
         {/* header */}
         <View style={styles.header}>
           <Text style={styles.title}>SimpleHub</Text>
           <View style={styles.icons}>
-            <Pressable onPress={() => router.push('notifications')}>
+            <Pressable onPress={() => router.push('./notifications')}>
               <Icon name="heart" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
-            <Pressable onPress={() => router.push('newPost')}>
+            <Pressable onPress={() => router.push('./newpost')}>
               <Icon name="plus" size={hp(3.2)} strokeWidth={2} color={theme.colors.text} />
             </Pressable>
-            <Pressable onPress={() => router.push('profile')}>
+            <Pressable onPress={() => router.push('./profile')}>
 
               
               <Avatar 
@@ -64,7 +67,7 @@ const Home = () => {
         </View>
 
       </View>
-      <Button title="logout" onPress={onLogout} />
+      {/* <Button title="logout" onPress={onLogout} /> */}
     </ScreenWrapper>
   )
 }
