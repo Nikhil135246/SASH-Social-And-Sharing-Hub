@@ -24,14 +24,16 @@ const MainLayout = () => {
 // bellow is the auth listern it trigger every time when user login , register,logsout
     supabase.auth.onAuthStateChange((_event, session)=>
     {
-      console.log('session user: ',session?.user?.id);
+      // console.log('session user: ',session?.user?.id);
       // uper walle code se id and user ka (?) hata doge to purrra session detial (user meta deta mill jayga    ) 
-
+      
       // setSession(session);
       if(session)//agar session ture h yani user login h tho home me jane bol sakte ha 
       {
+        
         setAuth(session?.user);
-        updateUserData(session?.user);  
+        updateUserData(session?.user,session?.user?.email);  
+        console.log('authuser: ',session?.user?.email);
         router.replace('main/home');// we willl replace current route so u user cannot go back to welcome page again 
         //first set auth is user ke liye 
         // move to home screen f
@@ -47,10 +49,10 @@ const MainLayout = () => {
     // return () => unsubscribe(); 
   },[]);//need to add this empty array very neccessary , for dependences , warna glitch hoga 
 
-  const updateUserData = async(user)=>{
+  const updateUserData = async(user,email)=>{
     let res = await getUserData(user?.id);
     console.log('got users data: ',res); // this shows yes we successfuly got the datas (name,bio,image,phoneno ...)
-    if(res.success) setUserData(res.data);
+    if(res.success) setUserData({...res.data,email});
   }
   return (
     <Stack

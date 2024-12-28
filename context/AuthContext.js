@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     //    - Use spread syntax to keep existing properties of 'user' while 
     //      overriding them with the provided 'userData'.
     const setUserData = (userData) => {
-      setUser({ ...user, ...userData });
+      setUser({ ...user, ...userData});
     };
   
     // 4. Render the AuthContext.Provider component.
