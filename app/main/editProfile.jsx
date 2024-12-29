@@ -12,10 +12,14 @@ import { useState } from 'react'
 import Input from '../../components/Input'
 import Button from '../../components/Button'
 import Loading from '../../components/Loading'
+import { updateUser } from '../../services/userService'
+import { router, useRouter } from 'expo-router'
+import * as ImagePicker from 'expo-image-picker';
 
 const EditProfile = () => {
-    const { user: currentUser } = useAuth();
-    const[loading,setLoading]=useState(false);
+    const { user: currentUser, setUserData } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const router = useRouter();
     // dekho uper wala bhi initially user likhe hua tha per kyu  ki hm 
     // niche wale funciton mem user chaiye tho uper wale ka nam current  user kr diye
     const [user, setUser] = useState({
@@ -45,21 +49,55 @@ const EditProfile = () => {
     }, [currentUser]); // Re-run this effect whenever `currentUser` changes
 
     const onPickImage = async () => {
+        // pre requsite to install npx expo install expo-image-picker and import
+        // ! for more learnign must visit "docs.expo.dev/versions/latest/sdk/imagepicker/#configuration-in-appjsonappconfigjs" 
+
+        let result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'], // u can also consider videos like ['image','videos']
+            allowsEditing: true,
+            aspect: [3,3],
+            quality: 0.7,// originally is 1 but for less data uses ill make it 0.7
+        })
+        if (!result.canceled) {
+            setUser({...user, image: result.assets[0]});
+
+            // eske baad apne ye line change kiya line90 : let image...
+          }
 
     }
-    const onSubmit = async ()=>{
-        let userData = {...user};
-        let{name,phoneNumber,address,image,bio}=userData;
-        if(!name||!phoneNumber||!address||!bio)
-        {
-            Alert.alert('Profile',"Please fill all the fields!");
+    const onSubmit = async () => {
+        let userData = { ...user };//user ki shallow copy create karna taki unnecassy update no jay apna origanal user 
+
+        let { name, phoneNumber, address, image, bio } = userData;//destucturing simple extracting name , pno. ..etc for easier access form user data
+        if (!name || !phoneNumber || !address || !bio || !image) {
+            Alert.alert('Profile', "Please fill all the fields!");
             return;
         }
         setLoading(true);
-        //update user detial
+        if(typeof image == 'object')
+        {
+            //!  we will have to upload image in database ( for that we have to make bucket in supabase 2:44:48)
 
+            // ! now in side image service will write exprot function 
+            
+        }
+        //update user detial
+        
+        //res = response 
+        const res = await updateUser(currentUser?.id, userData);
+        setLoading(false);
+        console.log('update user result: ', res);
+        // ! yahan tak user table tho update ho chuka per auth taible mein huaa hoga reflect ye 
+        // tho ab niche reflect karenge (if upddate sucess then , setuser data ( cureentuser ka deta + just updated data(userData)))
+        if (res.success) {
+            setUserData({ ...currentUser, ...userData });
+            router.back();
+        }
     }
-    let imageSource = getUserImageSrc(user.image);
+    let imageSource = user.image && typeof user.image == 'object'? user.image.uri : getUserImageSrc(user.image);
+    //  condition bola image h and vo object tyep ka ha yani key value  pair tho ( use object se sirf uri wala part do )
+    //  agar object ni tho simple getuserImgarsrc se usre ka image do 
+
     return (
         <ScreenWrapper bg="white">
             <View style={styles.container}>
@@ -81,40 +119,40 @@ const EditProfile = () => {
                             placeholder="Enter your name"
                             value={user.name}
                             // uper walla code by defalut user's name show karege 
-                            onChangeText={(value) => setUser({...user,name:value})
-                            //  ye  bol raha jo naya value 
-                             }
+                            onChangeText={(value) => setUser({ ...user, name: value })
+                                //  ye  bol raha jo naya value 
+                            }
                         />
                         <Input
                             icon={<Icon name="call" />}
                             placeholder="Enter your phone number"
                             value={user.phoneNumber}
                             // uper walla code by defalut user's name show karege 
-                            onChangeText={(value) => setUser({...user,phoneNumber:value})
-                            //  ye  bol raha jo naya value 
-                             }
+                            onChangeText={(value) => setUser({ ...user, phoneNumber: value })
+                                //  ye  bol raha jo naya value 
+                            }
                         />
                         <Input
                             icon={<Icon name="location" />}
                             placeholder="Enter your address"
                             value={user.address}
                             // uper walla code by defalut user's name show karege 
-                            onChangeText={(value) => setUser({...user,address:value})
-                            //  ye  bol raha jo naya value 
-                             }
+                            onChangeText={(value) => setUser({ ...user, address: value })
+                                //  ye  bol raha jo naya value 
+                            }
                         />
-                        
+
                         <Input
                             placeholder="Enter your bio"
                             value={user.bio}
                             multiline={true}
                             containerStyle={styles.bio}
                             // uper walla code by defalut user's name show karege 
-                            onChangeText={(value) => setUser({...user,bio:value})
-                            //  ye  bol raha jo naya value 
-                             }
+                            onChangeText={(value) => setUser({ ...user, bio: value })
+                                //  ye  bol raha jo naya value 
+                            }
                         />
-                        <Button title='Update' loading={loading} onPress={onSubmit}/>
+                        <Button title='Update' loading={loading} onPress={onSubmit} />
                     </View>
                 </ScrollView>
             </View>

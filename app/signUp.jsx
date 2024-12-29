@@ -19,6 +19,7 @@ const SignUp = () => {
   const passwordRef = useRef("");
   const onSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
+      // ! One kinda mistake ki user may reggister with only email and password no need to enter name 
       Alert.alert('SignUp', "please fill all the fields🥺!");
       return;
 
@@ -35,7 +36,7 @@ const SignUp = () => {
       options:{
         data:
         {
-          name
+          name,email
         }
       }
     });
