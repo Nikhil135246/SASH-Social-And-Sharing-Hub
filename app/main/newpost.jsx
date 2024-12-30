@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import Header from '../../components/Header'
@@ -10,52 +10,98 @@ import { useAuth } from '../../context/AuthContext'
 import RichTextEditor from '../../components/RichTextEditor'
 import { useRoute } from '@react-navigation/native'
 import { useRef } from 'react'
+import Icon from '../../assets/icons'
+import Button from '../../components/Button'
+import * as ImagePicker from 'expo-image-picker'
 
 const NewPost = () => {
   const { user } = useAuth();
   const bodyRef = useRef("");
   const editorRef = useRef("");
-  const router=useRoute();
-  const [loading,setLoading]=useState(false);
-  const [file,setFile] = useState(false);// this hook is for if we upload images or videos
-  
+  const router = useRoute();
+  const [loading, setLoading] = useState(false);
+  const [file, setFile] = useState(false);// this hook is for if we upload images or videos
+
+  const onPick = async (isImage) => {
+
+    let mediaConfig = {
+
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [3, 3],
+      quality: 0.7,
+    }
+    if (!isImage) {
+      mediaConfig = {
+        mediaTypes: ['videos'],
+        allowsEditing: true,
+      }
+    }
+    let result = await ImagePicker.launchImageLibraryAsync(mediaConfig);
+    if(!result.canceled)
+    {
+      setFile(result.assets[0]);// jobhi aap file select karoge vo SetFile mein yani mein aajaynga 
+    }
+  }
+  const onSubmit = async () => {
+
+  }
+
   return (
     <ScreenWrapper bg="white">
       <View style={styles.container}>
 
-        <Header title="Creat Post"/>
-          <ScrollView contentContainerStyle={{ gap: 20 }}>
-            {/* content containerstyle se itemse ke beech gap mil jayga */}
-            {/* avatar  */}
-            <View style={styles.header}>
-              <Avatar
-                uri={user?.image}
-                size={hp(6.5)}
-                rounded={theme.radius.xl}
-              />
-              <View style={{gap:2}}>
-                <Text style={styles.username}>
-                  {
-                    user && user.name 
-                  }
+        <Header title="Creat Post" />
+        <ScrollView contentContainerStyle={{ gap: 20 }}>
+          {/* content containerstyle se itemse ke beech gap mil jayga */}
+          {/* avatar  */}
+          <View style={styles.header}>
+            <Avatar
+              uri={user?.image}
+              size={hp(6.5)}
+              rounded={theme.radius.xl}
+            />
+            <View style={{ gap: 2 }}>
+              <Text style={styles.username}>
+                {
+                  user && user.name
+                }
 
-                </Text>
-                <Text style={styles.publicText}>
-                  
-                    public
-                  
+              </Text>
+              <Text style={styles.publicText}>
 
-                </Text>
-              </View>
+                public
+
+
+              </Text>
             </View>
+          </View>
 
-            <View style={styles.textEditor}>
-              {/* now for editor we use reactnative library (pell rich editor) */}
-              <RichTextEditor editorRef={editorRef} onChange={body=>bodyRef.current=body}/>
+          <View style={styles.textEditor}>
+            {/* now for editor we use reactnative library (pell rich editor) */}
+            <RichTextEditor editorRef={editorRef} onChange={body => bodyRef.current = body} />
 
+          </View>
+          <View style={styles.media}>
+            <Text style={styles.addImageText}>Add to your post</Text>
+            <View style={styles.mediaIcons}>
+              <TouchableOpacity onPress={() => onPick(true)}>
+                <Icon name="image" size={30} color={theme.colors.dark} />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => onPick(false)}>
+                <Icon name="video" size={33} color={theme.colors.dark} />
+              </TouchableOpacity>
             </View>
-          </ScrollView>
-      
+          </View>
+        </ScrollView>
+        <Button
+          buttonStyle={{ height: hp(6.2)  , backgroundColor: theme.colors.primaryDark2}}
+          title="Post"
+          loading={loading}
+          hasShadow={false}
+          onPress={onSubmit}
+        />
+
       </View>
 
     </ScreenWrapper>

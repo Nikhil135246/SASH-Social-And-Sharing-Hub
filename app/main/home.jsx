@@ -11,6 +11,7 @@ import { useRouter } from 'expo-router';
 import  Avatar  from '../../components/Avatar';
 
 
+
 const Home = () => {
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
   const router = useRouter();

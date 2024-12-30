@@ -15,10 +15,10 @@ const welcome = () => {
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
       <View style={styles.container}>
-        <Image style={styles.welcomeImage} resizeMode='contain' source={require('../assets/images/welcome.png')} />
+        <Image style={styles.welcomeImage} resizeMode='contain' source={require('../assets/images/welcome2.png')} />
         {/* titel */}
         <View style={{ gap: 20 }}>
-          <Text style={styles.title}>LinkUp!</Text>
+          <Text style={styles.title}>SimpleHub!</Text>
           {/* <Text style={styles.punchline}>Stay in the loop, share your world, and connect authentically.</Text> */}
           <Text style={styles.punchline}>Where your voice is valued, and every connection feels authentic and true.</Text>
         </View>

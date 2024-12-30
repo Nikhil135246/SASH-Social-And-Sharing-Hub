@@ -10,6 +10,7 @@ import { wp, hp } from '../helpers/common.js'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import { supabase } from '../lib/supabase'
+import { createClient } from '@supabase/supabase-js'
 
 
 const Login = () => {
