@@ -4,7 +4,7 @@ import ScreenWrapper from '../../components/ScreenWrapper'
 import { hp, wp } from '../../helpers/common'
 import { theme } from '../../constants/theme'
 import { useAuth } from '../../context/AuthContext'
-import { getUserImageSrc } from '../../services/imageService'
+import { getUserImageSrc, uploadFile } from '../../services/imageService'
 import Icon from '../../assets/icons'
 import Header from '../../components/Header'
 import { Image } from 'expo-image'
@@ -55,14 +55,14 @@ const EditProfile = () => {
         let result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ['images'], // u can also consider videos like ['image','videos']
             allowsEditing: true,
-            aspect: [3,3],
+            aspect: [3, 3],
             quality: 0.7,// originally is 1 but for less data uses ill make it 0.7
         })
         if (!result.canceled) {
-            setUser({...user, image: result.assets[0]});
+            setUser({ ...user, image: result.assets[0] });
 
             // eske baad apne ye line change kiya line90 : let image...
-          }
+        }
 
     }
     const onSubmit = async () => {
@@ -74,15 +74,17 @@ const EditProfile = () => {
             return;
         }
         setLoading(true);
-        if(typeof image == 'object')
-        {
+        if (typeof image == 'object') {
             //!  we will have to upload image in database ( for that we have to make bucket in supabase 2:44:48)
+            // ! now inside imageService we will write exprot function ''
+            let imageRes = await uploadFile('porfiles', image?.uri, true);
+            // passing folder name (profile), and uri of image
+            if (imageRes.success) userData.image = imageRes.data; //imageRes ko 2 chiz return hogi { ture , data(imagepath)} where data is  itself(data.path)
+            else userData.image = null; // u can also throw error but let's not 
 
-            // ! now in side image service will write exprot function 
-            
         }
         //update user detial
-        
+
         //res = response 
         const res = await updateUser(currentUser?.id, userData);
         setLoading(false);
@@ -94,7 +96,7 @@ const EditProfile = () => {
             router.back();
         }
     }
-    let imageSource = user.image && typeof user.image == 'object'? user.image.uri : getUserImageSrc(user.image);
+    let imageSource = user.image && typeof user.image == 'object' ? user.image.uri : getUserImageSrc(user.image);
     //  condition bola image h and vo object tyep ka ha yani key value  pair tho ( use object se sirf uri wala part do )
     //  agar object ni tho simple getuserImgarsrc se usre ka image do 
 
