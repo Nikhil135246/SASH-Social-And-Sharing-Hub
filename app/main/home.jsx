@@ -16,7 +16,7 @@ const Home = () => {
   const router = useRouter();
 
   // Import the useAuth hook (assuming it's defined elsewhere)
-  const { user, setAuth } = useAuth(); 
+  const { user, setAuth } = useAuth()
   console.log('user: ', user);// we can chaeck in home page its not showing all the user data that we have defined in supabase user's table (like name,image ,bio, phone no etc )
   // tho ye karne ke liye we will write a line in _layout.jsx ( updateUserData(session?.user);  )
   // Define an asynchronous function for handling logout

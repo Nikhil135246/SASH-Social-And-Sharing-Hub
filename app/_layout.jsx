@@ -30,10 +30,13 @@ const MainLayout = () => {
       // setSession(session);
       if(session)//agar session ture h yani user login h tho home me jane bol sakte ha 
       {
+
         
         setAuth(session?.user);
+
         updateUserData(session?.user,session?.user?.email);  
         console.log('authuser: ',session?.user?.email);
+        
         router.replace('main/home');// we willl replace current route so u user cannot go back to welcome page again 
         //first set auth is user ke liye 
         // move to home screen f

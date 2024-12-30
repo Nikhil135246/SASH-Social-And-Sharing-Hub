@@ -1,13 +1,30 @@
 import * as FileSystem from 'expo-file-system'
+import { supabase } from '../lib/supabase';
+import { decode } from 'base64-arraybuffer';
+import { supabaseUrl } from '../constants';
 
 
-export const getUserImageSrc = imagePath => {
+export const getUserImageSrc = imagePath => {  // note that imagePath is parameter here we passing to function
 
     if (imagePath) {
-        return { uri: imagePath }//returning opbject if we found imagepath
+        return getSupabaseFileUrl(imagePath);
     } else {
         return require('../assets/images/defaultUser.png');
     }
+}
+
+export  const getSupabaseFileUrl= filePath =>{
+    if(filePath)
+    {
+        // we have to do this 👇
+        // return {uri: `https://ktbvfpxzwcceqhjjlscz.supabase.co/storage/v1/object/public/uploads/${filePath}`}
+        // per kyu ki "https://ktbvfpxzwcceqhjjlscz.supabase.co" part is same as we save in supabaseUrl in constant so we jsut replace it 
+
+
+        return {uri: `${supabaseUrl}/storage/v1/object/public/uploads/${filePath}`}
+
+    }
+    return null;
 }
 
 export const uploadFile = async (folderName, fileUri, isImage = true) => {
@@ -18,7 +35,31 @@ export const uploadFile = async (folderName, fileUri, isImage = true) => {
             encoding: FileSystem.EncodingType.Base64// we have base64 data 
         })
         // converting base64 into arraybuffer by decoding 
-        let imageData = decode
+        let imageData = decode(fileBase64);//give us arraybuffer of that file
+        let { data, error } = await supabase
+            .storage
+            .from('uploads')//Refers to the storage bucket named 'uploads   ' in Supabase.
+            .upload(fileName, imageData,
+                // filename(jo fileName: The name of the file in the storage.
+                //imageData: The actual file content to be uploaded.)
+                {
+                    cacheControl: '3600',
+                    // Sets how long (in seconds) the file can be cached by browsers or CDNs. Here, it's cached for 3600 seconds (1 hour
+                    upsert: false,// Prevents overwriting if a file with the same name already exists in the bucket.
+                    contentType: isImage ? 'image/*' : 'video/*'
+                    // /* mane upload of multiple formate, subtypes (image/* = image/jpeg , image/png....)
+                });
+        if (error) {
+
+            console.log('file upload error: ', error);
+            return { success: false, msg: 'Could not upload media' };
+        }
+        return {success:true,data:data.path}//supabase mein that data ka ek path property hota ha vo apan return lenge
+        /* 
+        any doubt about data.path juar check
+        https://supabase.com/docs/reference/javascript/storage-from-upload  under response*/
+
+
     }
     catch (error) {
         console.log('file upload error: ', error);
