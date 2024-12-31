@@ -11,12 +11,7 @@ import Button from '../components/Button';
 import { supabase } from '../lib/supabase';
 import { useAuthRequest, makeRedirectUri } from 'expo-auth-session';
 import { theme } from '../constants/theme';
-import { GoogleClientId } from '../constants/index';
-import * as webBrowser from "expo-web-browser"
-import * as Google from "expo-auth-session/providers/google"
-import AsyncStorage from "@react-native-async-storage/async-storage"
-
-
+import { GoogleClientId, supabaseAnonKey } from '../constants';
 
 const SignUp = () => {
   const router = useRouter();
@@ -25,19 +20,15 @@ const SignUp = () => {
   const passwordRef = useRef('');
   const [loading, setLoading] = useState(false);
 
-  // Set up Google OAuth using expo-auth-session
   const [request, response, promptAsync] = useAuthRequest({
-    clientId: GoogleClientId,  // Your Supabase anon key
-    redirectUri: makeRedirectUri({ native:'myapp',useProxy: true }),  // Expo redirect URI
+    clientId: GoogleClientId,
+    redirectUri: makeRedirectUri({ useProxy: true }),
     scopes: ['profile', 'email'],
-  }, {
-    authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth'
   });
 
-  // Function to handle form submission (email/password)
   const onSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
-      Alert.alert('SignUp', "Please fill all the fields🥺!");
+      Alert.alert('SignUp', "please fill all the fields🥺!");
       return;
     }
 
@@ -60,18 +51,17 @@ const SignUp = () => {
     }
   };
 
-  // Handle Google Sign-In response
   useEffect(() => {
     const handleGoogleSignIn = async () => {
       if (response?.type === 'success') {
         const { id_token } = response.params;
-
+        
         // Sign in with the Google OAuth token in Supabase
         const { user, session, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           token: id_token,
         });
-
+  
         if (error) {
           Alert.alert('Google Sign-In Error', error.message);
         } else {
@@ -80,12 +70,19 @@ const SignUp = () => {
         }
       }
     };
-
+  
     handleGoogleSignIn();
   }, [response]);
+  useEffect(() => {
+    if (response?.type === 'error') {
+      console.log('Google Sign-In Error:', response.params);
+      Alert.alert('Google Sign-In Error', response.params.error_description || 'An unknown error occurred.');
+    }
+  }, [response]);
+  
 
   return (
-    <ScreenWrapper bg={"white"}>
+    <ScreenWrapper bg={'white'}>
       <StatusBar style="dark" />
       <View style={styles.container}>
         <BackButton router={router} />
@@ -131,6 +128,8 @@ const SignUp = () => {
   );
 };
 
+export default SignUp;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -157,5 +156,3 @@ const styles = StyleSheet.create({
     fontSize: hp(1.6),
   },
 });
-
-export default SignUp;

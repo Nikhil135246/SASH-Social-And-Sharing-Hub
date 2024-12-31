@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.nik1214.SASHapp"
     },
     "web": {
       "bundler": "metro",
@@ -23,11 +24,6 @@
       "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "@react-native-google-signin/google-signin",
-      {
-        "iosUrlScheme": "com.googleusercontent.apps._some_id_here_"
-      },
-    
       "expo-router",
       [
         "expo-splash-screen",
@@ -38,11 +34,17 @@
           "backgroundColor": "#ffffff"
         }
       ]
-      
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "b83d8c79-417a-4058-b524-1d9fac0fc778"
+      }
     }
-    
   }
 }
