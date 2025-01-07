@@ -29,7 +29,8 @@ const RichTextEditor =
                         actions.undo,
                         actions.redo,
                         actions.heading1,//kyu dono ka icone ni ha tho aopan iconeMap se denge inke icone(iconeMap pell-rich-ediotr kar ha see doncumentation )
-                        actions.heading4//
+                        actions.heading4,//
+                        actions.nothing//
                     ]}
                     iconMap={{
                         [actions.heading1]: ({ tintColor }) => <Text style={{ color: tintColor }}>H1</Text>,
@@ -59,8 +60,9 @@ const styles = StyleSheet.create({
     richBar: {
         borderTopRightRadius: theme.radius.xl,
         borderTopLeftRadius: theme.radius.xl,
-        backgroundColor: theme.colors.gray
-
+        backgroundColor: theme.colors.gray,
+        
+        
     },
     rich: {
         minHeight: 240,

@@ -1,135 +1,136 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import ScreenWrapper from '../components/ScreenWrapper';
-import { StatusBar } from 'expo-status-bar';
-import BackButton from '../components/BackButton';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
+import React, { useRef, useState } from 'react'
+import ScreenWrapper from '../components/ScreenWrapper'
+import { theme } from '../constants/theme'
+import { StatusBar } from 'expo-status-bar'
+import BackButton from '../components/BackButton'
 import { useRouter } from 'expo-router';
-import Icon from '../assets/icons/index';
-import { wp, hp } from '../helpers/common';
-import Input from '../components/Input';
-import Button from '../components/Button';
-import { supabase } from '../lib/supabase';
-import { useAuthRequest, makeRedirectUri } from 'expo-auth-session';
-import { theme } from '../constants/theme';
-import { GoogleClientId } from '../constants/index';
+import Icon from '../assets/icons/index'
+import { wp, hp } from '../helpers/common.js'
+import Input from '../components/Input'
+import Button from '../components/Button'
+import { supabase } from '../lib/supabase'
 import * as webBrowser from "expo-web-browser"
 import * as Google from "expo-auth-session/providers/google"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { AndroidId, webId } from '../constants'
 
+webBrowser.maybeCompleteAuthSession();
 
+// web 436794015973-2mo0iluvu5lqonkg5uptde6s6natqm9r.apps.googleusercontent.com
+// android 436794015973-ge8kijt1snbie5l1cde673d43iadsp5q.apps.googleusercontent.com
 
 const SignUp = () => {
-  const router = useRouter();
-  const emailRef = useRef('');
-  const nameRef = useRef('');
-  const passwordRef = useRef('');
-  const [loading, setLoading] = useState(false);
 
-  // Set up Google OAuth using expo-auth-session
-  const [request, response, promptAsync] = useAuthRequest({
-    clientId: GoogleClientId,  // Your Supabase anon key
-    redirectUri: makeRedirectUri({ native:'myapp',useProxy: true }),  // Expo redirect URI
-    scopes: ['profile', 'email'],
-  }, {
-    authorizationEndpoint: 'https://accounts.google.com/o/oauth2/v2/auth'
+  const [userInfo, setUserInfo] = React.useState(null);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: AndroidId,
+    webClientId: null
   });
 
-  // Function to handle form submission (email/password)
+  const router = useRouter();
+  const emailRef = useRef("");
+  const nameRef = useRef("");
+  const passwordRef = useRef("");
   const onSubmit = async () => {
     if (!emailRef.current || !passwordRef.current) {
-      Alert.alert('SignUp', "Please fill all the fields🥺!");
+      // ! One kinda mistake ki user may reggister with only email and password no need to enter name 
+      Alert.alert('SignUp', "please fill all the fields🥺!");
       return;
-    }
 
-    let name = nameRef.current.trim();
-    let email = emailRef.current.trim();
-    let password = passwordRef.current.trim();
+    }
+    // good to go we can call the api to check 'supa'
+    let name = nameRef.current.trim();// will remove unnecassary blankspaces
+    let email = emailRef.current.trim();// will remove unnecassary blankspaces
+    let password = passwordRef.current.trim();// will remove unnecassary blankspaces
 
     setLoading(true);
     const { data: { session }, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { name, email },
-      },
+        data:
+        {
+          name, email
+        }
+      }
     });
     setLoading(false);
-
+    // this below console loge is to check singup pe sab sahi ja rah a h ki ni , u can try it 
+    // console.log('session: ',session);
+    // console.log('error: ',error);
     if (error) {
       Alert.alert('Sign up', error.message);
     }
+
   };
-
-  // Handle Google Sign-In response
-  useEffect(() => {
-    const handleGoogleSignIn = async () => {
-      if (response?.type === 'success') {
-        const { id_token } = response.params;
-
-        // Sign in with the Google OAuth token in Supabase
-        const { user, session, error } = await supabase.auth.signInWithOAuth({
-          provider: 'google',
-          token: id_token,
-        });
-
-        if (error) {
-          Alert.alert('Google Sign-In Error', error.message);
-        } else {
-          console.log('Google Sign-In Success:', user);
-          router.push('home');  // Redirect to the home screen
-        }
-      }
-    };
-
-    handleGoogleSignIn();
-  }, [response]);
-
+  // just storing pass and email , we can also use useStates  but its verybad , everytime updates when user enter anythgnn unnecassy compputation badhadega
+  const [loading, setLoading] = useState(false);
   return (
     <ScreenWrapper bg={"white"}>
       <StatusBar style="dark" />
       <View style={styles.container}>
         <BackButton router={router} />
+        {/* welcome */}
         <View>
           <Text style={styles.welcomeText}>Hey Buddy, </Text>
           <Text style={styles.welcomeText}>Let's Get Started</Text>
         </View>
+        {/* form */}
         <View style={styles.form}>
+          {/* Login message */}
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
             Enter your details below to create a new account and join us!🎉
           </Text>
 
+          {/* Input component with email icon */}
           <Input
             icon={<Icon name="mail" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your email"
-            onChangeText={(value) => (emailRef.current = value)}
+            placeholder='Enter your email'
+            onChangeText={value => emailRef.current = value}
+          // current value ko dal dega emailref pe 
+
           />
           <Input
             icon={<Icon name="user" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your name"
-            onChangeText={(value) => (nameRef.current = value)}
+            placeholder='Enter your name'
+            onChangeText={value => nameRef.current = value}
+          // current value ko dal dega emailref pe 
+
           />
           <Input
             icon={<Icon name="lock" size={26} strokeWidth={1.6} />}
-            placeholder="Enter your password"
+            placeholder='Enter your password'
             secureTextEntry
-            onChangeText={(value) => (passwordRef.current = value)}
+            // passwrod hide ho jay
+            onChangeText={value => passwordRef.current = value}
+
           />
 
-          <Button title={'Sign Up'} loading={loading} onPress={onSubmit} />
-          <Button title="Sign Up with Google" onPress={promptAsync} loading={loading} />
+
+          {/* button for login */}
+          <Button title='SignIn with Google' onPress={()=>promptAsync()} />
+          <Button title={'SignUp'} loading={loading} onPress={onSubmit} />
         </View>
+        {/* footer */}
         <View style={styles.footer}>
-          <Text style={styles.footerText}>Already have an account!</Text>
+          {/* Render the text "Don't have an account?" with the footerText style */}
+          <Text style={styles.footerText}>
+            Already have an account!
+          </Text>
+
+          {/* Create a Pressable component for the "Sign up" link */}
           <Pressable onPress={() => router.push('login')}>
-            <Text style={[styles.footerText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>
-              Login
-            </Text>
+            {/* Render the text "Sign up" within the Pressable component */}
+            <Text style={[styles.footerText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>Login</Text>
           </Pressable>
         </View>
       </View>
     </ScreenWrapper>
-  );
-};
+  )
+}
+
+export default SignUp
 
 const styles = StyleSheet.create({
   container: {
@@ -145,6 +146,11 @@ const styles = StyleSheet.create({
   form: {
     gap: 25,
   },
+  forgotPassword: {
+    textAlign: 'right',
+    fontWeight: theme.fonts.semibold,
+    color: theme.colors.text,
+  },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -155,7 +161,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: theme.colors.text,
     fontSize: hp(1.6),
-  },
-});
-
-export default SignUp;
+  }
+})

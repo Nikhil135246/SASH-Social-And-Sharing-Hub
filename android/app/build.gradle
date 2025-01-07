@@ -86,7 +86,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.sashapp"
+    namespace 'com.nik1214.SASHapp'
     defaultConfig {
         applicationId 'com.nik1214.SASHapp'
         minSdkVersion rootProject.ext.minSdkVersion

@@ -1,5 +1,6 @@
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useState } from 'react';
 import ScreenWrapper from '../../components/ScreenWrapper'
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -8,7 +9,10 @@ import { hp, wp } from '../../helpers/common';
 import { theme } from '../../constants/theme';
 import Icon from '../../assets/icons';
 import { useRouter } from 'expo-router';
-import  Avatar  from '../../components/Avatar';
+import Avatar from '../../components/Avatar';
+// import LottieView from 'lottie-react-native';
+import LottieView from 'lottie-react-native';
+import { fetchPost } from '../../services/postService';
 
 
 
@@ -18,7 +22,7 @@ const Home = () => {
 
   // Import the useAuth hook (assuming it's defined elsewhere)
   const { user, setAuth } = useAuth()
-  console.log('user: ', user);// we can chaeck in home page its not showing all the user data that we have defined in supabase user's table (like name,image ,bio, phone no etc )
+  //console.log('user: ', user);// we can chaeck in home page its not showing all the (that perticual  user's data) that we have defined in supabase user's table (like name,image ,bio, phone no etc )
   // tho ye karne ke liye we will write a line in _layout.jsx ( updateUserData(session?.user);  )
   // Define an asynchronous function for handling logout
 
@@ -36,12 +40,31 @@ const Home = () => {
   //   }
   // };
 
+  /* Here, a state variable post is defined using useState. It will store the posts fetched from the database. Initially, it's an empty array because no data has been fetched yet. */
+  const [post,setPost] = useState([]);//write now its an empty array it will hlep to fetch the post for home screen form supabase
+  
+    useEffect(()=>{
+      //useEffect: This hook runs after the component renders.
+      getPosts();
+      
+      //Dependency Array []: Since the dependency array is empty, this hook runs only once when the component mounts.
+    },[])
 
+  const getPosts= async ()=>
+  {
+    // call the api here mane supabase walla api .form()  . select wagera wall function nothing rocket science
+
+    let res = await fetchPost();
+    console.log('got Post result: ',res);
+
+  }
 
 
   return (
-    <ScreenWrapper bg={'white'} paddingTop={'10'}> 
-    {/* above paddding added by sonu , remove it if u want  */}
+
+    <ScreenWrapper bg={'white'} paddingTop={'10'}>
+
+      {/* above paddding added by sonu , remove it if u want  */}
       <View style={styles.container} >
         {/* header */}
         <View style={styles.header}>
@@ -55,8 +78,8 @@ const Home = () => {
             </Pressable>
             <Pressable onPress={() => router.push('./profile')}>
 
-              
-              <Avatar 
+
+              <Avatar
                 uri={user?.image}
                 size={hp(4.3)}
                 rounded={theme.radius.sm}
@@ -64,10 +87,15 @@ const Home = () => {
               />
             </Pressable>
           </View>
-        </View>
 
+        </View>
       </View>
       {/* <Button title="logout" onPress={onLogout} /> */}
+
+      <View style={styles.welcome}>
+        {/* <LottieView style={{ flex: 1 }} source={require('../../assets/images/welcome.json')} autoPlay loop /> */}
+
+      </View>
     </ScreenWrapper>
   )
 }
@@ -78,6 +106,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // paddingHorizontal: wp(4)
+  },
+  welcome: {
+    height: 300,
+    aspectRatio: 1
   },
   header: {
     flexDirection: 'row',
