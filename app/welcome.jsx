@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
 
     // Center the image within its parent container
     alignSelf: 'center',
+    top:35
   },
   title: {
     color: theme.colors.text,
