@@ -152,7 +152,7 @@ const Home = () => {
           }
           //! creating fucntion that  call get post when we rich end 
           onEndReached={() => {
-            console.log('got to the end ');
+            console.log('got to the end');
             getPosts();
 
           }}

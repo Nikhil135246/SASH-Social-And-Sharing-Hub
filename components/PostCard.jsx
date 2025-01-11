@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { hp, wp } from '../helpers/common';
 import { theme } from '../constants/theme';
 import Avatar from './Avatar';
@@ -10,8 +10,7 @@ import { Image } from 'expo-image';
 import { getSupabaseFileUrl } from '../services/imageService';
 import { Video } from 'expo-av';
 import { useState } from 'react';
-import { createPostLike } from '../services/postService';
-
+import { createPostLike, removePostLike } from '../services/postService';
 const textStyle = {
     color: theme.colors.dark,
     fontSize: hp(1.75)
@@ -32,7 +31,7 @@ const PostCard = ({
     currentUser,
     router,
     hasShadow = true,
-    
+
 }) => {
     // const shadowStyles = {
     //     shadowOffset: {
@@ -54,38 +53,61 @@ const PostCard = ({
         elevation: 5,        // Works for Android (shadow-like effect)
         shadowColor: 'rgba(0, 255, 255, 0.8)', // Change this to a glowing color, e.g., cyan
     };
-    
+    const [likes, setLikes] = useState([]);
+    useEffect(() => {
+        setLikes(item?.postlike)
+    }, [])
+
     // console.log('post item: ', item);
     const openPostDetails = () => {
         //leave for now 
     }
 
-    const onLike = async () =>
-    {//we call api again here supabse mein like dalne ke liye so we created our 3 function in postservices 
-        let data = {
-        userid: currentUser?.id,
-        postid : item?.id
-        }
-        let res = await createPostLike(data);
-        console.log('res: ',res);
-        if(!res.success)
+    const onLike = async () => {//we call api again here supabse mein like dalne ke liye so we created our 3 function in postservices 
+        if(liked)
         {
-            Alert.alert('Post','Something went wrong!');
+            //remove like
+            
+            let updatedLikes=likes.filter(like=> like.userid!=currentUser?.id);
+            
+            setLikes([...updatedLikes])
+            // setlikes karna ...likes = add previous likes
+            let res = await removePostLike(item?.id,currentUser?.id);
+            console.log('removed like res: ', res);
+            if (!res.success) {
+                Alert.alert('Post', 'Something went wrong!');
+            } 
+            
+        }
+        else {
+            // create like
+            let data = {
+                userid: currentUser?.id,
+                postid: item?.id
+            }
+            setLikes([...likes, data])
+            // setlikes karna ...likes = add previous likes
+            let res = await createPostLike(data);
+            console.log('like added: ', res);
+            if (!res.success) {
+                Alert.alert('Post', 'Something went wrong!');
+            }
         }
 
     }
-   /*    // Toggle fullscreen on video click
-      const handleVideoPress = () => {
-        setIsFullScreen(!isFullScreen); // toggle fullscreen state
-    } */
+    /*    // Toggle fullscreen on video click
+       const handleVideoPress = () => {
+         setIsFullScreen(!isFullScreen); // toggle fullscreen state
+     } */
     //const [isFullScreen, setIsFullScreen] = useState(false); // state to control fullscreen
 
-    const likes=[];
-    const liked = false;
+    const createdAt = moment(item?.created_at).format('MMM D')// formate kar raha date ko MMM D se formate karega according to english month and day
+    const liked = likes.filter(like => like.userid == currentUser?.id)[0] ? true : false;
+    // condition work as if current user liked this post then liked = true;
     // console.log('post item:',item); this console log is just to check wheather my postlike array showing in items or not 
 
 
-    const createdAt = moment(item?.created_at).format('MMM D')// formate kar raha date ko MMM D se formate karega according to english month and day
+
     return (
         // <View style={[styles.container, hasShadow && shadowStyles]}> // vy me sonu and orignal 
         <View style={[styles.container, hasShadow && glowingStyles]}>
@@ -107,7 +129,7 @@ const PostCard = ({
                     <Icon name='threeDotsHorizontal' size={hp(4)} strowkewidth={4} color={theme.colors.textDark} />
                 </TouchableOpacity>
 
-        </View >
+            </View >
             {/* Post Body & media  */}
             <View style={styles.content}>
                 <View style={styles.postBody}>
@@ -149,31 +171,31 @@ const PostCard = ({
                 {/* post videos */}
                 {
                     item?.file && item?.file?.includes('postVideos') && (
-                        
+
                         <Video
                             style={[styles.postMedia, { height: hp(30) }]}
                             source={getSupabaseFileUrl(item?.file)}
                             useNativeControls
                             resizeMode='cover'
                             isLooping
-                            // shouldPlay={isFullScreen} // Ensures video plays only in fullscreen mode
-                            // isMuted={!isFullScreen} // You can mute video in non-fullscreen mode
+                        // shouldPlay={isFullScreen} // Ensures video plays only in fullscreen mode
+                        // isMuted={!isFullScreen} // You can mute video in non-fullscreen mode
                         />
-                    
+
                     )
                 }
 
             </View>
             {/* like, comment, share */}
-            <View style = {styles.footer}>
+            <View style={styles.footer}>
                 <View style={styles.footerButton}>
                     <TouchableOpacity onPress={onLike}>
-                        <Icon name="heart" size={24} fill={liked?theme.colors.rose:'transparent'} color ={liked?theme.colors.rose:theme.colors.textLight}/>
+                        <Icon name="heart" size={24} fill={liked ? theme.colors.rose : 'transparent'} color={liked ? theme.colors.rose : theme.colors.textLight} />
                         {/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
                         {/*  dekho bhaii heart ke icon file mein dekho waha mein as prob ek fill karke option h jo apne yahan se yani 👆parent component se pass kar ke color fill karwa sakte ha  */}
                     </TouchableOpacity>
                     {/* text for like count  */}
-                    <Text style ={styles.count}>
+                    <Text style={styles.count}>
                         {
                             likes?.length
 
@@ -182,11 +204,11 @@ const PostCard = ({
                 </View>
                 <View style={styles.footerButton}>
                     <TouchableOpacity>
-                        <Icon name='comment' size={24} color ={theme.colors.textLight}/>{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
-                        
+                        <Icon name='comment' size={24} color={theme.colors.textLight} />{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
+
                     </TouchableOpacity>
                     {/* text for comment count  */}
-                    <Text style ={styles.count}>
+                    <Text style={styles.count}>
                         {
                             0
                         }
@@ -194,10 +216,10 @@ const PostCard = ({
                 </View>
                 <View style={styles.footerButton}>
                     <TouchableOpacity>
-                        <Icon name='share' size={24} color ={theme.colors.textLight}/>{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
-                        
+                        <Icon name='share' size={24} color={theme.colors.textLight} />{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
+
                     </TouchableOpacity>
-                    
+
                 </View>
             </View>
         </View>
@@ -220,19 +242,19 @@ export default PostCard
         borderColor: theme.colors.gray,
         shadowColor: '#000'
     }, */
-    const styles = StyleSheet.create({
-        container: {
-            gap: 10,
-            marginBottom: 15,
-            borderRadius: theme.radius.xxl * 1.1,
-            borderCurve: 'continuous',
-            padding: 10,
-            paddingVertical: 12,
-            backgroundColor: 'white',
-            borderWidth: 0.5,
-            borderColor: theme.colors.gray,
-            shadowColor: '#000',
-        },
+const styles = StyleSheet.create({
+    container: {
+        gap: 10,
+        marginBottom: 15,
+        borderRadius: theme.radius.xxl * 1.1,
+        borderCurve: 'continuous',
+        padding: 10,
+        paddingVertical: 12,
+        backgroundColor: 'white',
+        borderWidth: 0.5,
+        borderColor: theme.colors.gray,
+        shadowColor: '#000',
+    },
 
     header: {
         flexDirection: 'row',
@@ -296,6 +318,6 @@ export default PostCard
         fontSize: hp(1.8)
     }
 
-   
+
 
 })
