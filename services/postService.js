@@ -71,7 +71,7 @@ export const fetchPosts = async (limit = 10) => {
 
 export const createPostLike = async (postLike) => {
     // this function recive postLike a object 
-    // console.log('Received postLike:', postLike); //check postLike ke ander dono present h ki ni ( postId,userid )
+     //console.log('Received postLike:', postLike); //check postLike ke ander dono present h ki ni ( postId,userid )
     try {
         const { data, error } = await supabase
         //fuck just because of await  my code dindt works sucess true but data is undefiend cause i its dint wait for promise to accept or reject and rest of lines just runs like syncronoun 
@@ -102,14 +102,14 @@ export const removePostLike = async (postId, userId) => {
             .from('postlike')
             .delete()
             .eq('userid', userId) // supabase mein post table mein userId coloum ka naam mein i small ha is liye (userid likha here)
-            .eq('postId', postId)
+            .eq('postid', postId)
 
         if (error) {
 
             console.log('PostLike error', error);
             return { success: false, msg: 'Could not remove the post ' };
         }
-        return { success: true, data: data };
+        return { success: true};
 
     } catch (error) {
         console.log('PostLike error', error);
