@@ -102,14 +102,22 @@ export const removePostLike = async (postId, userId) => {
             .from('postlike')
             .delete()
             .eq('userid', userId) // supabase mein post table mein userId coloum ka naam mein i small ha is liye (userid likha here)
+<<<<<<< HEAD
             .eq('postid', postId)
+=======
+            .eq('postId', postId)
+>>>>>>> 9f390c0 (updated likes)
 
         if (error) {
 
             console.log('PostLike error', error);
             return { success: false, msg: 'Could not remove the post ' };
         }
+<<<<<<< HEAD
         return { success: true };
+=======
+        return { success: true, data: data };
+>>>>>>> 9f390c0 (updated likes)
 
     } catch (error) {
         console.log('PostLike error', error);
