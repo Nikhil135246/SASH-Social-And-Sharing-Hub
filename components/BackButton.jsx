@@ -19,6 +19,6 @@ const styles = StyleSheet.create({
         padding: 5,
         marginTop: 2,
         borderRadius: theme.radius.sm,
-        backgroundColor: 'rgba(0, 0, 0, 0.07)'
+        backgroundColor: '#e1fffc'
     }
 })

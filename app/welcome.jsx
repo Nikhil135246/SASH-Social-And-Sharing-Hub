@@ -8,17 +8,17 @@ import { theme } from '../constants/theme.js'
 import Button from '../components/Button.jsx'
 import { useRouter } from 'expo-router'
 import Login from './login.jsx'
-import SignUp from './SignUp.jsx'
+import SignUp from './signUp.jsx'
 const welcome = () => {
   const router = useRouter();
   return (
     <ScreenWrapper bg="white">
       <StatusBar style="dark" />
       <View style={styles.container}>
-        <Image style={styles.welcomeImage} resizeMode='contain' source={require('../assets/images/welcome.png')} />
+        <Image style={styles.welcomeImage} resizeMode='contain' source={require('../assets/images/welcome2.png')} />
         {/* titel */}
         <View style={{ gap: 20 }}>
-          <Text style={styles.title}>LinkUp!</Text>
+          <Text style={styles.title}>SimpleHub!</Text>
           {/* <Text style={styles.punchline}>Stay in the loop, share your world, and connect authentically.</Text> */}
           <Text style={styles.punchline}>Where your voice is valued, and every connection feels authentic and true.</Text>
         </View>
@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
 
     // Center the image within its parent container
     alignSelf: 'center',
+    top:35
   },
   title: {
     color: theme.colors.text,

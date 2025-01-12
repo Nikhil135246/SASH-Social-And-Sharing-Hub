@@ -1,10 +1,12 @@
-import { View, Text } from 'react-native';
+import { View, Text, LogBox } from 'react-native';
 import React, { useEffect } from 'react';
 import { Stack ,useRouter} from 'expo-router';
 import { AuthProvider, useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { getUserData } from '../services/userService';
 
+LogBox.ignoreLogs(['Warning: TNodeChildrenRenderer','Warning: MemoizedTNodeRenderer','Warning: TRenderEngineProvider']);
+// this log box.will ignore the warning mention in line 67in postCard
 
 
 const _layout = ()=>

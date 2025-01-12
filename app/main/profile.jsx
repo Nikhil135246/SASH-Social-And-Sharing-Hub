@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
     right: 0,
     padding: 5,
     borderRadius: theme.radius.sm,
-    backgroundColor: '#fee2e2'
+    backgroundColor: '#e1fffc'
   },
 
   listStyle: {

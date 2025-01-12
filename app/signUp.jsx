@@ -1,4 +1,4 @@
-import { Alert,Pressable, StyleSheet, Text, View } from 'react-native'
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native'
 import React, { useRef, useState } from 'react'
 import ScreenWrapper from '../components/ScreenWrapper'
 import { theme } from '../constants/theme'
@@ -10,9 +10,24 @@ import { wp, hp } from '../helpers/common.js'
 import Input from '../components/Input'
 import Button from '../components/Button'
 import { supabase } from '../lib/supabase'
+import * as webBrowser from "expo-web-browser"
+import * as Google from "expo-auth-session/providers/google"
+import AsyncStorage from "@react-native-async-storage/async-storage"
+import { AndroidId, webId } from '../constants'
 
+webBrowser.maybeCompleteAuthSession();
+
+// web 436794015973-2mo0iluvu5lqonkg5uptde6s6natqm9r.apps.googleusercontent.com
+// android 436794015973-ge8kijt1snbie5l1cde673d43iadsp5q.apps.googleusercontent.com
 
 const SignUp = () => {
+
+  const [userInfo, setUserInfo] = React.useState(null);
+  const [request, response, promptAsync] = Google.useAuthRequest({
+    androidClientId: AndroidId,
+    webClientId: null
+  });
+
   const router = useRouter();
   const emailRef = useRef("");
   const nameRef = useRef("");
@@ -26,17 +41,17 @@ const SignUp = () => {
     }
     // good to go we can call the api to check 'supa'
     let name = nameRef.current.trim();// will remove unnecassary blankspaces
-    let email =emailRef.current.trim();// will remove unnecassary blankspaces
+    let email = emailRef.current.trim();// will remove unnecassary blankspaces
     let password = passwordRef.current.trim();// will remove unnecassary blankspaces
-    
+
     setLoading(true);
-    const {data:{session},error} = await supabase.auth.signUp({
+    const { data: { session }, error } = await supabase.auth.signUp({
       email,
       password,
-      options:{
+      options: {
         data:
         {
-          name,email
+          name, email
         }
       }
     });
@@ -44,9 +59,8 @@ const SignUp = () => {
     // this below console loge is to check singup pe sab sahi ja rah a h ki ni , u can try it 
     // console.log('session: ',session);
     // console.log('error: ',error);
-    if(error)
-    {
-      Alert.alert('Sign up',error.message);
+    if (error) {
+      Alert.alert('Sign up', error.message);
     }
 
   };
@@ -66,7 +80,7 @@ const SignUp = () => {
         <View style={styles.form}>
           {/* Login message */}
           <Text style={{ fontSize: hp(1.5), color: theme.colors.text }}>
-          Enter your details below to create a new account and join us!🎉
+            Enter your details below to create a new account and join us!🎉
           </Text>
 
           {/* Input component with email icon */}
@@ -92,9 +106,10 @@ const SignUp = () => {
             onChangeText={value => passwordRef.current = value}
 
           />
-    
+
 
           {/* button for login */}
+          <Button title='SignIn with Google' onPress={()=>promptAsync()} />
           <Button title={'SignUp'} loading={loading} onPress={onSubmit} />
         </View>
         {/* footer */}
@@ -105,9 +120,9 @@ const SignUp = () => {
           </Text>
 
           {/* Create a Pressable component for the "Sign up" link */}
-          <Pressable onPress={()=>router.push('login')}>
+          <Pressable onPress={() => router.push('login')}>
             {/* Render the text "Sign up" within the Pressable component */}
-            <Text style = {[styles.footerText, {color: theme.colors.primaryDark, fontWeight:theme.fonts.semibold}]}>Login</Text>
+            <Text style={[styles.footerText, { color: theme.colors.primaryDark, fontWeight: theme.fonts.semibold }]}>Login</Text>
           </Pressable>
         </View>
       </View>

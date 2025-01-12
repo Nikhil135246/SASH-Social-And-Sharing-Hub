@@ -9,7 +9,7 @@ export const getUserImageSrc = imagePath => {  // note that imagePath is paramet
     if (imagePath) {
         return getSupabaseFileUrl(imagePath);
     } else {
-        return require('../assets/images/defaultUser.png');
+        return require('../assets/images/defaultUser2.jpeg');
     }
 }
 

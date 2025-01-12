@@ -69,8 +69,10 @@ const EditProfile = () => {
         let userData = { ...user };//user ki shallow copy create karna taki unnecassy update no jay apna origanal user 
 
         let { name, phoneNumber, address, image, bio } = userData;//destucturing simple extracting name , pno. ..etc for easier access form user data
-        if (!name || !phoneNumber || !address || !bio || !image) {
+        if (!name || !phoneNumber || !address || !bio) { 
+            //! sonu , Sonu  ek khatara change kiya hun uper se (...!bio || !image ) essa tha image hata diya i want jarrori ni update karne time profile bhi update karna pade 
             Alert.alert('Profile', "Please fill all the fields!");
+
             return;
         }
         setLoading(true);
