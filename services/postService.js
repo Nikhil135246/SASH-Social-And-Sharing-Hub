@@ -47,7 +47,8 @@ export const fetchPosts = async (limit = 10) => {
             .select(` 
                 *,
                 user:users(id, name, image),
-                postlike (*)
+                postlike (*),
+                comments(count)
 
             `
             )// notice here we are using backticks 
@@ -66,6 +67,38 @@ export const fetchPosts = async (limit = 10) => {
     } catch (error) {
         console.log('fetch post erro', error);
         return { success: false, msg: 'Could not fetch the post' };
+    }
+}
+
+
+export const fetchPostDetials = async (postId) => {
+    try {
+        const { data, error } = await supabase
+            .from('posts')
+            .select(` 
+                *,
+                user:users(id, name, image),
+                postlike (*),
+                comments(*,  user: users(id,image,name))
+            `
+            )
+            // notice here we are using backticks 
+            // ! and remember that never ever give comman in last like of selected items in .select(``)
+            // postlike is liye fetch kiya ja raha ha taki jin user ne jisko like kiya h usko show bhi karna padega na 
+            .eq('id',postId) // vo post fetch karo jiske id = (postId = we passed)
+            .order("created_at",{ascending:false, foreignTable:'comments'})
+            .single();
+
+        if (error) {
+
+            console.log('fetchPostDetials error', error);
+            return { success: false, msg: 'Could not fetch the postDetials' };
+        }
+        return { success: true, data: data };
+
+    } catch (error) {
+        console.log('fetchPostDetials erro', error);
+        return { success: false, msg: 'Could not fetch the postDetials' };
     }
 }
 
@@ -114,5 +147,50 @@ export const removePostLike = async (postId, userId) => {
     } catch (error) {
         console.log('PostLike error', error);
         return { success: false, msg: 'Could not remove the post ' };
+    }
+}
+export const removeComment = async (commentId) => {
+    // this function recive postLike a object 
+    try {
+        const { error } = await supabase
+            .from('comments')
+            .delete()
+            .eq('id', commentId)
+
+        if (error) {
+
+            console.log('remove comment error', error);
+            return { success: false, msg: 'Could not remove the comment ' };
+        }
+        return { success: true,data:{commentId} };
+
+    } catch (error) {
+        console.log('PostLikeremove comment error', error);
+        return { success: false, msg: 'Could not remove the comment ' };
+    }
+}
+
+
+
+export const createComment = async (comment) => {
+    try {
+        const { data, error } = await supabase
+            .from("comments")
+            .insert(comment)
+            .select()
+            .single()
+            console.log('Comment Data:',data);
+        if (error) {
+
+            console.log('Comment error', error);
+            return { success: false, msg: 'Could not create comment' };
+        }
+        return { success: true, data: data };
+
+
+
+    } catch (error) {
+        console.log('Comment error', error);
+        return { success: false, msg: 'Could not create comment' };
     }
 }

@@ -21,6 +21,7 @@ import Delete from './Delete';
 import Logout from './Logout';
 import Image from './Image';
 import Video from './Video';
+import Send2 from './Send2';
 import { theme } from '../../constants/theme'; // Import theme colors from the theme file
 
 // Create a dictionary to map icon names to their corresponding components
@@ -46,6 +47,7 @@ const icons = {
   logout: Logout,
   image: Image,
   video: Video,
+  send2: Send2,
 
 };
 

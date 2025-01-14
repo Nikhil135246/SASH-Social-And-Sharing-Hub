@@ -72,11 +72,11 @@ const EditProfile = () => {
         if (!name || !phoneNumber || !address || !bio) { 
             //! sonu , Sonu  ek khatara change kiya hun uper se (...!bio || !image ) essa tha image hata diya i want jarrori ni update karne time profile bhi update karna pade 
             Alert.alert('Profile', "Please fill all the fields!");
-
             return;
         }
         setLoading(true);
         if (typeof image == 'object') {
+        
             //!  we will have to upload image in database ( for that we have to make bucket in supabase 2:44:48)
             // ! now inside imageService we will write exprot function ''
             let imageRes = await uploadFile('porfiles', image?.uri, true);

@@ -158,35 +158,30 @@ const Home = () => {
           }}
           onEndReachedThreshold={0}
           // that means jab last ke zero pixel mein pahuncho ge tho onendreached  hoga 
-          ListFooterComponent={hasMore? (
 
-            /*  this will show in bottom of list  */
-
+          ListFooterComponent={hasMore ? (
             <View style={{ marginVertical: posts.length == 0 ? 275 : 30 }}>
-              {/* kyu ek jab  initally home page load hoga( ya 0 post hoga ) tho loading screen top mein dekhega ajeeb lagega 
-              so we will do jab no post ho  es liye if posts zeor ha tho magin 200 warna 30  */}
-
-              //! after this part now very imp important part
-              {/* now we do enable  realtime changes in supabase ( database > publication > initalaaly zero table seletect for realtime updation , now we select ( notification , post , and comment table to make it realtime))
+               {/* 
+               kyu ek jab  initally home page load hoga( ya 0 post hoga ) tho loading screen top mein dekhega ajeeb lagega 
+               so we will do jab no post ho  es liye if posts zeor ha tho magin 200 warna 30  
+               //! after this part now very imp important part
+              now we do enable  realtime changes in supabase ( database > publication > initalaaly zero table seletect for realtime updation , now we select ( notification , post , and comment table to make it realtime))
               also at last i diabled truncating event ( check se uncheckd kiya isko ) kyu ki ye ni chahye kuch delete ni karna h apne ko 
-              
-              */}
-              //! now we make channel wichi listen posts in posts table ( doin this code after this getpostos funciton  )
-              {/* useEffect(() => {
-                  //useEffect: This hook runs after the component renders.
-                  getPosts(); */}
+           
+               //! now we make channel wichi listen posts in posts table ( doin this code after this getpostos funciton line  )
+               */}
               <Loading />
-
+              
             </View>
-
-          )  :(
-            <View style = {{marginVertical:30}}>
+          ) : (
+            <View style={{ marginVertical: 30 }}>
               <Text style={styles.noPosts}>No more posts</Text>
-
             </View>
           )}
+        
 
         />
+        
       </View>
       {/* <Button title="logout" onPress={onLogout} /> */}
 
@@ -198,7 +193,7 @@ const Home = () => {
   )
 }
 
-export default Home
+export default Home;
 
 const styles = StyleSheet.create({
   container: {

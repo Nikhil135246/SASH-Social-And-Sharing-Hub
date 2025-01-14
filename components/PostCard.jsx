@@ -1,16 +1,17 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Share, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useEffect } from 'react'
-import { hp, wp } from '../helpers/common';
+import { hp, stripHtmlTags, wp } from '../helpers/common';
 import { theme } from '../constants/theme';
 import Avatar from './Avatar';
 import moment from 'moment';
 import Icon from '../assets/icons';
 import RenderHTML from 'react-native-render-html';
 import { Image } from 'expo-image';
-import { getSupabaseFileUrl } from '../services/imageService';
+import { downloadFile, getSupabaseFileUrl } from '../services/imageService';
 import { Video } from 'expo-av';
 import { useState } from 'react';
 import { createPostLike, removePostLike } from '../services/postService';
+import Loading from './Loading';
 const textStyle = {
     color: theme.colors.dark,
     fontSize: hp(1.75)
@@ -31,6 +32,7 @@ const PostCard = ({
     currentUser,
     router,
     hasShadow = true,
+    showMoreIcon = true,
 
 }) => {
     // const shadowStyles = {
@@ -54,30 +56,40 @@ const PostCard = ({
         shadowColor: 'rgba(0, 255, 255, 0.8)', // Change this to a glowing color, e.g., cyan
     };
     const [likes, setLikes] = useState([]);
+    const [loading, setLoading] = useState(false);
     useEffect(() => {
         setLikes(item?.postlike)
     }, [])
 
     // console.log('post item: ', item);
     const openPostDetails = () => {
-        //leave for now 
+        if(!showMoreIcon) return null;
+        // first time showmoreicone false hogo tho aap 3 dots pe cleck karoge and redirect ho jaoge postdetialspage mein 
+        // onec u r in postdetial now we dont want to again click karo 3dots,comment icone and redirect ho jao wapis postadetials mein (ye tho loop h n kyu ki)
+
+        router.push({ pathname: './postDetails', params: { postId: item?.id } })
+        // Dynamic Data Passing here we routing to pathname(./postDetials), along with some data ki PostId bhi sath lete jao 
+        //  its like if u click comment icone of post id =5 
+        // path is ./postDetials?postId=5
+        // dont confuse (?) means query parameter = extra infomation jo add karne wallae ho in our case extra info = postId 
+        // ! Note its alwasy a key  value pair (key,value)=(postId,5);
+        // https://youtu.be/nwKYCqwb-OI?t=246
     }
 
     const onLike = async () => {//we call api again here supabse mein like dalne ke liye so we created our 3 function in postservices 
-        if(liked)
-        {
+        if (liked) {
             //remove like
-            
-            let updatedLikes=likes.filter(like=> like.userid!=currentUser?.id);
-            
+
+            let updatedLikes = likes.filter(like => like.userid != currentUser?.id);
+
             setLikes([...updatedLikes])
             // setlikes karna ...likes = add previous likes
-            let res = await removePostLike(item?.id,currentUser?.id);
+            let res = await removePostLike(item?.id, currentUser?.id);
             console.log('removed like res: ', res);
             if (!res.success) {
                 Alert.alert('Post', 'Something went wrong!');
-            } 
-            
+            }
+
         }
         else {
             // create like
@@ -100,6 +112,29 @@ const PostCard = ({
          setIsFullScreen(!isFullScreen); // toggle fullscreen state
      } */
     //const [isFullScreen, setIsFullScreen] = useState(false); // state to control fullscreen
+    const onShare = async () => {
+        let content = { message: stripHtmlTags(item?.body) };
+        /* react native ka defalut Share (posts ke body ko  share karega but body mein apna content <div> hellow im spidy<div> essa  ha esko as it share ni kar sakte.
+        will create a striphtmllTag function in side common.js   )
+        we just wrap like stripHtmlTag(item?.body) easy */
+        if (item?.file) {
+            setLoading(true);
+            // if file ha , first Download the file then share URI
+            let url = await downloadFile(getSupabaseFileUrl(item?.file).uri);
+            if (!url) {
+                console.error('File download failed');
+                setLoading(false);
+                Alert.alert('Error', 'File download failed.');
+                return;
+            }
+
+
+            setLoading(false);
+            content.url = url;
+        }
+        console.log('content:', content);
+        Share.share(content);
+    }
 
     const createdAt = moment(item?.created_at).format('MMM D')// formate kar raha date ko MMM D se formate karega according to english month and day
     const liked = likes.filter(like => like.userid == currentUser?.id)[0] ? true : false;
@@ -125,9 +160,14 @@ const PostCard = ({
                         {/* need to formate the date showing by above item?.created  SO WEHVE TO INSTALL NPM I MOMENT*/}
                     </View>
                 </View>
-                <TouchableOpacity onPress={openPostDetails}>
-                    <Icon name='threeDotsHorizontal' size={hp(4)} strowkewidth={4} color={theme.colors.textDark} />
-                </TouchableOpacity>
+                {
+                    showMoreIcon && (
+
+                        <TouchableOpacity onPress={openPostDetails}>
+                            <Icon name='threeDotsHorizontal' size={hp(4)} strowkewidth={4} color={theme.colors.textDark} />
+                        </TouchableOpacity>
+                    )
+                }
 
             </View >
             {/* Post Body & media  */}
@@ -203,22 +243,29 @@ const PostCard = ({
                     </Text>
                 </View>
                 <View style={styles.footerButton}>
-                    <TouchableOpacity>
+                    <TouchableOpacity onPress={openPostDetails}>
                         <Icon name='comment' size={24} color={theme.colors.textLight} />{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
 
                     </TouchableOpacity>
                     {/* text for comment count  */}
                     <Text style={styles.count}>
                         {
-                            0
+                            item?.comments[0]?.count
                         }
                     </Text>
                 </View>
                 <View style={styles.footerButton}>
-                    <TouchableOpacity>
-                        <Icon name='share' size={24} color={theme.colors.textLight} />{/* its color gonna be change when we click so make a const bollear liked = flase initialy  */}
+                    {
+                        loading ? (
+                            <Loading size='small' />
+                        ) : (
 
-                    </TouchableOpacity>
+                            <TouchableOpacity onPress={onShare}>
+                                <Icon name='share' size={24} color={theme.colors.textLight} />
+
+                            </TouchableOpacity>
+                        )
+                    }
 
                 </View>
             </View>
