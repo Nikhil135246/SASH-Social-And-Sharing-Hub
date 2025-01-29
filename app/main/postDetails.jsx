@@ -58,7 +58,7 @@ const PostDetails = () => {
     }
   };
 
-  useEffect(() => {
+  useEffect(() =>  {
     let commentChannel = supabase
       .channel("comments")
       .on(
@@ -144,6 +144,7 @@ const PostDetails = () => {
       </View>
     );
   }
+  
   const onDeletePost=async(item)=>{
     console.log("Delete post:",item);
     // post delete api call 
@@ -202,6 +203,8 @@ const PostDetails = () => {
           showDelete={true}
           onDelete={onDeletePost}
           onEdit={onEditPost}
+          onVideoPlay={() => {}}
+          currentlyPlayingPostId={() => {}}
         />
         {/* create comment input ui */}
         <View style={styles.inputContainer}>
@@ -239,7 +242,7 @@ const PostDetails = () => {
           ))}
           {post?.comments?.length == 0 && (
             <Text style={{ color: theme.colors.text, marginLeft: 5 }}>
-              Be first to commen
+              Be first to comment
             </Text>
           )}
         </View>

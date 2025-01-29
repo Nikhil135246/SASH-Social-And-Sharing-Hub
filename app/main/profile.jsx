@@ -134,17 +134,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-
+  
   headerContainer: {
     marginHorizontal: wp(4),
     marginBottom: 20,
   },
-
+  
   headerShape: {
     width: wp(100),
     height: hp(20),
   },
-
+  
   avatarContainer: {
     height: hp(12),
     width: hp(12),
@@ -163,13 +163,13 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 7
   },
-
+  
   userName: {
     fontSize: hp(3),
     fontWeight: '500',
     color: theme.colors.textDark
   },
-
+  
   info: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -180,7 +180,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: theme.colors.textLight
   },
-
+  
   logoutButton: {
     position: 'absolute',
     right: 0,
@@ -188,12 +188,12 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.sm,
     backgroundColor: '#e1fffc'
   },
-
+  
   listStyle: {
     paddingHorizontal: wp(4),
     paddingBottom: 30,
   },
-
+  
   noPosts: {
     fontSize: hp(2),
     textAlign: 'center',

@@ -28,6 +28,8 @@ import { preProcessFile } from "typescript";
 
 var limit = 0;
 const Home = () => {
+
+  
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
   const router = useRouter();
 
@@ -50,13 +52,23 @@ const Home = () => {
   //     Alert.alert('Sign out', "Error signing out!");
   //   }
   // };
-
+  const [currentlyPlayingPostId, setCurrentlyPlayingPostId] = useState(null); // State to track currently playing video
+    // Handle video play event (to stop other videos)
+    const handleVideoPlay = (postId) => {
+      // If the video is already playing, stop it
+      if (currentlyPlayingPostId === postId) {
+        setCurrentlyPlayingPostId(null); // Stop the video
+      } else {
+        setCurrentlyPlayingPostId(postId); // Play the selected video
+      }
+    };
+  
   /* Here, a state variable post is defined using useState. It will store the posts fetched from the database. Initially, it's an empty array because no data has been fetched yet. */
   const [posts, setPosts] = useState([]); //write now its an empty array it will hlep to fetch the post for home screen form supabase
 
+  
   const [hasMore, setHasMore] = useState(true);
   // this has more is for if we scroll to end then apne ko kaise pata chalega aur post batach ha ki , kyu apna logic abhi tak tho bs fetch karta tha extra post irrespective of ki post aur ha ki ni tho ye fix karna h
-
   const handlePostEvent = async (payload) => {
     //!payload is the data sent by Supabase when a change (like adding a new post) occurs in the database. It contains the details of that change.
     console.log(
@@ -174,6 +186,7 @@ const Home = () => {
           </View>
         </View>
         {/* posts  */}
+        
         <FlatList
           initialNumToRender={10}
           data={posts}
@@ -181,7 +194,7 @@ const Home = () => {
           contentContainerStyle={styles.listStyle}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <PostCard item={item} currentUser={user} router={router} />
+            <PostCard item={item} currentUser={user} router={router} currentlyPlayingPostId={currentlyPlayingPostId} onVideoPlay={handleVideoPlay}/>
           )}
           //! creating fucntion that  call get post when we rich end
           onEndReached={() => {
@@ -229,6 +242,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     // paddingHorizontal: wp(4)
+    marginTop: hp(-1.5),
   },
   welcome: {
     height: 300,
