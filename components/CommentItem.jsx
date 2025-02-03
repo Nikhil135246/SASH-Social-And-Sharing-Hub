@@ -6,7 +6,7 @@ import moment from "moment";
 import Avatar from "./Avatar";
 import Icon from "../assets/icons";
 
-const CommentItem = ({
+const  CommentItem = ({
   item,
   canDelete = false,
   onDelete = () => {
@@ -14,6 +14,7 @@ const CommentItem = ({
     // just to avoid errors , just to be in safe side
     // because im passing ondelte function from parent
   },
+  highlight = false,
 }) => {
   const createdAt = moment(item?.created_at).format("MMM d");
   const handelDelete = () => {
@@ -35,7 +36,7 @@ const CommentItem = ({
     <View style={styles.container}>
       <Avatar uri={item?.user?.image} />
 
-      <View style={styles.content}>
+      <View style={[styles.content, highlight && styles.highlight]}>
         <View
           style={{
             flexDirection: "row",

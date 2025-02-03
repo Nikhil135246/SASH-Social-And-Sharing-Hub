@@ -27,6 +27,22 @@ export  const getSupabaseFileUrl= filePath =>{
     return null;
 }
 
+export const downloadFile = async (url)=>
+    {
+        try {
+            const {uri} = await FileSystem.downloadAsync(url,getLocalFilePath(url)) 
+            // local getLocalFIlePath give path where be downloaded file is going to save
+            // FileSystem is module of expo-file-system to download file 
+            // downloadAsync returns a promise, and once the file is downloaded, it provides the file's local URI (local path on the device).
+            // u can say u are usein downlaodAsync module form fileSystem ( url , path to sotre the downloaded file)
+            
+            return uri;
+        } catch (error) {
+            return null;
+        }
+    }
+
+    
 export const uploadFile = async (folderName, fileUri, isImage = true) => {
     try {
         let fileName = getFilePath(folderName, isImage);//! generating filename 
@@ -68,20 +84,7 @@ export const uploadFile = async (folderName, fileUri, isImage = true) => {
 }
 
 
-export const downloadFile = async (url)=>
-{
-    try {
-        const {uri} = await FileSystem.downloadAsync(url,getLocalFilePath(url)) 
-        // local getLocalFIlePath give path where be downloaded file is going to save
-        // FileSystem is module of expo-file-system to download file 
-        // downloadAsync returns a promise, and once the file is downloaded, it provides the file's local URI (local path on the device).
-        // u can say u are usein downlaodAsync module form fileSystem ( url , path to sotre the downloaded file)
-        
-        return uri;
-    } catch (error) {
-        return null;
-    }
-}
+
 export const getLocalFilePath = filePath=>{
     let fileName = filePath.split('/').pop(); 
     // url ko thod dega jahan jahan (/ ayage) then pop() is liye taki last split mil jay like(https://home/file/image.png) = image.png

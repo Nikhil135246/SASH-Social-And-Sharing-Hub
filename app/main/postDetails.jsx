@@ -25,9 +25,12 @@ import Icon from "../../assets/icons";
 import CommentItem from "../../components/CommentItem";
 import { supabase } from "../../lib/supabase";
 import { getUserData } from "../../services/userService";
+import NewPost from "./newpost";
+import { create } from "react-test-renderer";
+import { createNotification } from "../../services/notificationService";
 
 const PostDetails = () => {
-  const { postId } = useLocalSearchParams();
+  const { postId ,commentId} = useLocalSearchParams();
   const { user } = useAuth();
   const router = useRouter();
   const [startLoading, setStartLoading] = useState(true); //initally its ture we make it faluse when we have successfully fetch the post detials
@@ -110,6 +113,18 @@ const PostDetails = () => {
     let res = await createComment(data);
     setLoading(false);
     if (res.success) {
+      if(user.id  != post.userid)
+      {
+        // send notification
+        let notify={
+          senderid:user.id,
+          receiverid:post.userid,
+          title:"Commented on your post",
+          // we do stringify because we are sending data in string format
+          data:JSON.stringify({postId:post.id,commentId:res.data.id})
+        }
+        createNotification(notify);
+      }
       // send notification to post for every one do it later
       inputRef?.current?.clear();
       commentRef.current = ""; //here ? ni lagega because we are setting value
@@ -159,6 +174,8 @@ const PostDetails = () => {
   }
   const onEditPost=async(item)=>{
     console.log("Edit post:",item);
+    router.back();
+      router.push({pathname:'./newpost',params:{...item}})
   }
 
   if (!post) {
@@ -238,6 +255,7 @@ const PostDetails = () => {
               item={comment}
               canDelete={user.id == comment.userid || user.id == post.userid}
               onDelete={onDeleteComment}
+              highlight={commentId == comment.id}
             />
           ))}
           {post?.comments?.length == 0 && (

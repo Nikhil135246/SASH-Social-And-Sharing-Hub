@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View, Image, Pressable,Alert } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import ScreenWrapper from '../../components/ScreenWrapper'
 import Header from '../../components/Header'
 import { hp, wp } from '../../helpers/common'
@@ -8,7 +8,7 @@ import { ScrollView } from 'react-native'
 import Avatar from '../../components/Avatar'
 import { useAuth } from '../../context/AuthContext'
 import RichTextEditor from '../../components/RichTextEditor'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useRef } from 'react'
 import Icon from '../../assets/icons'
 import Button from '../../components/Button'
@@ -19,6 +19,9 @@ import { createOrUpdatePost } from '../../services/postService'
 // import { Image } from 'react-native-web'
 
 const NewPost = () => {
+  const post = useLocalSearchParams();
+  // uselocalserachparam is a hook which is used to get the data from the previous screen // and make sure u passed that data form preivouse screen
+  console.log('post:', post); 
   const { user } = useAuth();
   const bodyRef = useRef("");
   const editorRef = useRef("");
@@ -26,6 +29,18 @@ const NewPost = () => {
   const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(false);// this hook is for if we upload images or videos
 
+
+  useEffect(( ) => {
+    if(post && post.id){
+      bodyRef.current = post.body;
+      setFile(post.file || null);
+      setTimeout(() => {
+        
+        editorRef?.current?.setContentHTML(post.body);
+      }, 300);
+    }
+
+  }, [])
   const onPick = async (isImage) => {
 
     let mediaConfig = {
@@ -59,6 +74,7 @@ const NewPost = () => {
   const getFileType = file =>{
     if (!file) return null;
     if (isLocalFile(file)) {  
+      console.log('file type:',file.type);
       return file.type;
     }
       
@@ -66,7 +82,7 @@ const NewPost = () => {
       // file apna wahan se aaraha ha (setFile(result.assest[0])); yani ek object ke form mein tho type hoga hi object mein (uri,metadata ,type sab store hota ha )
       
       // check image or video for remort file ( yani jab post edidt karoge tho post thodi local se ayga na vo tho server se ayga na )
-      if (file.include('postImages')) {
+      if (file.includes('postImages')) {
         //agar file postimaegs se aya yani pakka image file ha 
         return 'image';
       }
@@ -93,6 +109,10 @@ const NewPost = () => {
       body: bodyRef.current,
       userid: user?.id,
 
+    }
+    if(post && post.id)// agar post h and post ke ander id bhi h to update karo
+    {
+        data.id = post.id;
     }
     // creat post 
     setLoading(true);
@@ -209,7 +229,7 @@ const NewPost = () => {
         </ScrollView>
         <Button
           buttonStyle={{ height: hp(6.2), backgroundColor: theme.colors.primaryDark2 }}
-          title="Post"
+          title={post && post.id? "Update":"Post"}
           loading={loading}
           hasShadow={false}
           onPress={onSubmit}

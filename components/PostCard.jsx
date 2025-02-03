@@ -72,9 +72,22 @@ const PostCard = ({
   const [likes, setLikes] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const [lastClick, setLastClick] = useState(0); // Track the last click time
+  const doubleClickThreshold = 300; // Time threshold for double click (in milliseconds)
+
   useEffect(() => {
     setLikes(item?.postlike || []); // Set likes (fix for the undefined error)
   }, [item]);
+
+  const handleDoubleClick = () => {
+    const currentTime = new Date().getTime();
+    if (currentTime - lastClick < doubleClickThreshold) {
+      // Double click detected
+      onLike(); // Toggle the like
+    }
+    setLastClick(currentTime);
+  };
+
 
   const openPostDetails = () => {
     if (!showMoreIcon) return null;
@@ -108,6 +121,7 @@ const PostCard = ({
     if (item?.file) {
       setLoading(true);
       let url = await downloadFile(getSupabaseFileUrl(item?.file).uri);
+      
       if (!url) {
         setLoading(false);
         Alert.alert("Error", "File download failed.");
@@ -169,7 +183,9 @@ const PostCard = ({
           {item?.body && <RenderHTML contentWidth={wp(100)} source={{ html: item?.body || " " }} tagsStyles={tagsStyles} />}
         </View>
         {item?.file && item?.file?.includes("postImages") && (
-          <Image source={getSupabaseFileUrl(item?.file)} transition={100} style={styles.postMedia} contentFit="cover" />
+          <TouchableOpacity onPress={handleDoubleClick}> 
+          <Image source={getSupabaseFileUrl(item?.file)} transition={100} activeOpacity={0.01} style={styles.postMedia} contentFit="cover" />
+        </TouchableOpacity>
         )}
         {item?.file && item?.file?.includes("postVideos") && (
           <TouchableOpacity onPress={handleVideoPress}>

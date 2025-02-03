@@ -28,8 +28,6 @@ import { preProcessFile } from "typescript";
 
 var limit = 0;
 const Home = () => {
-
-  
   // router for when people click any icone in ♥ .. it redirect to corresponding pages
   const router = useRouter();
 
@@ -53,22 +51,21 @@ const Home = () => {
   //   }
   // };
   const [currentlyPlayingPostId, setCurrentlyPlayingPostId] = useState(null); // State to track currently playing video
-    // Handle video play event (to stop other videos)
-    const handleVideoPlay = (postId) => {
-      // If the video is already playing, stop it
-      if (currentlyPlayingPostId === postId) {
-        setCurrentlyPlayingPostId(null); // Stop the video
-      } else {
-        setCurrentlyPlayingPostId(postId); // Play the selected video
-      }
-    };
-  
+  // Handle video play event (to stop other videos)
+  const handleVideoPlay = (postId) => {
+    // If the video is already playing, stop it
+    if (currentlyPlayingPostId === postId) {
+      setCurrentlyPlayingPostId(null); // Stop the video
+    } else {
+      setCurrentlyPlayingPostId(postId); // Play the selected video
+    }
+  };
+
   /* Here, a state variable post is defined using useState. It will store the posts fetched from the database. Initially, it's an empty array because no data has been fetched yet. */
   const [posts, setPosts] = useState([]); //write now its an empty array it will hlep to fetch the post for home screen form supabase
+  const [hasMore, setHasMore] = useState(true); // this has more is for if we scroll to end then apne ko kaise pata chalega aur post batach ha ki , kyu apna logic abhi tak tho bs fetch karta tha extra post irrespective of ki post aur ha ki ni tho ye fix karna h
+  const[notificationCount,setnotificationCount]=useState(0);
 
-  
-  const [hasMore, setHasMore] = useState(true);
-  // this has more is for if we scroll to end then apne ko kaise pata chalega aur post batach ha ki , kyu apna logic abhi tak tho bs fetch karta tha extra post irrespective of ki post aur ha ki ni tho ye fix karna h
   const handlePostEvent = async (payload) => {
     //!payload is the data sent by Supabase when a change (like adding a new post) occurs in the database. It contains the details of that change.
     console.log(
@@ -104,7 +101,30 @@ const Home = () => {
         return updatedPosts;
       });
     }
+    if (payload.eventType == "UPDATE" && payload?.new?.id) {
+      // This checks if the event type is 'update' (i.e., a  post has been updated).
+
+      setPosts((prevPosts) => {
+        let updatedPosts = prevPosts.map((post) => {
+          if (post.id == payload.new.id) {
+            post.body = payload.new.body;
+            post.file = payload.new.file;
+          }
+          return post;
+        });
+        return updatedPosts;
+      });
+
+
+
+    }
   };
+  const handleNewNotification = async (payload) => {  
+    console.log("new notification", payload);
+    if(payload.eventType=="INSERT" && payload?.new?.id){
+      setnotificationCount(prev=>prev+1);
+    }
+  }
 
   useEffect(() => {
     // let commentChannel=supabase
@@ -122,12 +142,22 @@ const Home = () => {
       // postgres_changes is a special event in Supabase that listens for changes in a table (like inserts, updates, or deletes).
       // on(ye hone mein , ye call kar do )
       .subscribe();
+    let notificationChannel = supabase
+      .channel("notifications")
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications" ,filter: `receiverid=eq.${user.id}`},
+        handleNewNotification,
+      )
+      .subscribe();
+
 
     //4:24:36 time to know more for video
     //useEffect: This hook runs after the component renders.
     // getPosts();// we are already calling this function in onEndReached line mein so no need to call here c
     return () => {
       supabase.removeChannel(postChannel);
+      supabase.removeChannel(notificationChannel);
       // supabase.removeChannel(commentChannel);
       // return () => { supabase.removeChannel(postChannel); }: When the component is unmounted (e.g., the user navigates away from this page), this removes the real-time channel to stop listening to changes, preventing unnecessary memory usage or errors.
     };
@@ -159,13 +189,23 @@ const Home = () => {
         <View style={styles.header}>
           <Text style={styles.title}>SimpleHub</Text>
           <View style={styles.icons}>
-            <Pressable onPress={() => router.push("./notifications")}>
+            <Pressable onPress={() => {
+              setnotificationCount(0);
+              router.push("./notifications")
+              }}>
               <Icon
                 name="heart"
                 size={hp(3.2)}
                 strokeWidth={2}
                 color={theme.colors.text}
-              />
+                />
+                {
+                  notificationCount>0 && (
+                    <View style={styles.pill}>
+                      <Text style={styles.pillText}>{notificationCount}</Text>
+                    </View>
+                   )
+                }
             </Pressable>
             <Pressable onPress={() => router.push("./newpost")}>
               <Icon
@@ -174,6 +214,7 @@ const Home = () => {
                 strokeWidth={2}
                 color={theme.colors.text}
               />
+
             </Pressable>
             <Pressable onPress={() => router.push("./profile")}>
               <Avatar
@@ -186,7 +227,7 @@ const Home = () => {
           </View>
         </View>
         {/* posts  */}
-        
+
         <FlatList
           initialNumToRender={10}
           data={posts}
@@ -194,7 +235,13 @@ const Home = () => {
           contentContainerStyle={styles.listStyle}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <PostCard item={item} currentUser={user} router={router} currentlyPlayingPostId={currentlyPlayingPostId} onVideoPlay={handleVideoPlay}/>
+            <PostCard
+              item={item}
+              currentUser={user}
+              router={router}
+              currentlyPlayingPostId={currentlyPlayingPostId}
+              onVideoPlay={handleVideoPlay}
+            />
           )}
           //! creating fucntion that  call get post when we rich end
           onEndReached={() => {
