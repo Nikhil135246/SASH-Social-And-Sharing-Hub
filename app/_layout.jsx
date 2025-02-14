@@ -62,7 +62,7 @@ const MainLayout = () => {
   return (
     <Stack
       screenOptions={{
-        headerShown: true, // Set header visibility to false
+        headerShown: false, // Set header visibility to false
       }}
     >
       <Stack.Screen
