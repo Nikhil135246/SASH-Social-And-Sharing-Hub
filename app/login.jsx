@@ -89,15 +89,15 @@ const Login = () => {
           </Text>
 
           {/* Create a Pressable component for the "Sign up" link */}
-          <Pressable onPress={()=>router.push('SignUp')}>
+          <Pressable onPress={()=>router.push('signUp')}>
             {/* Render the text "Sign up" within the Pressable component */}
             <Text style = {[styles.footerText, {color: theme.colors.primaryDark, fontWeight:theme.fonts.semibold}]}>Sign up</Text>
           </Pressable>
         </View>
       </View>
     </ScreenWrapper>
-  )
-}
+  );
+};
 
 export default Login
 

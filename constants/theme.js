@@ -14,6 +14,7 @@ export const theme = {
       rose: '#ef4444',
       roseLight: '#f87171',
       loading:'#33b2ff',
+      notification:'#ff0000',
     },
     fonts: {
       medium: '500',

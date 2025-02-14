@@ -1,3 +1,10 @@
+import React, {
+  useEffect,
+  useCallback,
+  memo,
+  useMemo,
+  useState,
+} from "react";
 import {
   Alert,
   FlatList,
@@ -6,8 +13,6 @@ import {
   Text,
   View,
 } from "react-native";
-import React, { useEffect } from "react";
-import { useState } from "react";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useAuth } from "../../context/AuthContext";
 import { supabase } from "../../lib/supabase";
@@ -15,280 +20,286 @@ import { Button } from "react-native";
 import { hp, wp } from "../../helpers/common";
 import { theme } from "../../constants/theme";
 import Icon from "../../assets/icons";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import Avatar from "../../components/Avatar";
-// import LottieView from 'lottie-react-native';
-// import LottieView from 'lottie-react-native';
 import { fetchPosts } from "../../services/postService";
 import PostCard from "../../components/PostCard";
 import Loading from "../../components/Loading";
-import LoadingAnimated from "../../components/LoadingAnimated";
 import { getUserData } from "../../services/userService";
-import { preProcessFile } from "typescript";
 
-var limit = 0;
+let limit = 0;
+
 const Home = () => {
-  // router for when people click any icone in ♥ .. it redirect to corresponding pages
   const router = useRouter();
-
-  // Import the useAuth hook (assuming it's defined elsewhere)
   const { user, setAuth } = useAuth();
-  //console.log('user: ', user);// we can chaeck in home page its not showing all the (that perticual  user's data) that we have defined in supabase user's table (like name,image ,bio, phone no etc )
-  // tho ye karne ke liye we will write a line in _layout.jsx ( updateUserData(session?.user);  )
-  // Define an asynchronous function for handling logout
+  const [currentlyPlayingPostId, setCurrentlyPlayingPostId] = useState(null);
+  const [posts, setPosts] = useState([]);
+  const [hasMore, setHasMore] = useState(true);
+  const [notificationCount, setnotificationCount] = useState(0);
+  const [autoPlayEnabled, setAutoPlayEnabled] = useState({});
 
-  // const onLogout = async () => {
-  //   // Clear the local authentication state
-  //   // setAuth(null); no need to setauth null cuase it been already null from that layoutpage
-  //   setAuth(null);
-  //   // Attempt to sign out from Supabase
-  //   const { error } = await supabase.auth.signOut();
+  // Redirect to login if there is no user.
+  useEffect(() => {
+    // if (!user) {
+    //   router.replace("./login");
+    // }
+  }, [user, router]);
 
-  //   // Check if there was an error during sign out
-  //   if (error) {
-  //     // Display an error alert to the user
-  //     Alert.alert('Sign out', "Error signing out!");
-  //   }
-  // };
-  const [currentlyPlayingPostId, setCurrentlyPlayingPostId] = useState(null); // State to track currently playing video
-  // Handle video play event (to stop other videos)
-  const handleVideoPlay = (postId) => {
-    // If the video is already playing, stop it
-    if (currentlyPlayingPostId === postId) {
-      setCurrentlyPlayingPostId(null); // Stop the video
-    } else {
-      setCurrentlyPlayingPostId(postId); // Play the selected video
-    }
+  // This hook always runs so that hook order remains consistent.
+  useFocusEffect(
+    useCallback(() => {
+      if (!user) {
+        // Reset state when user logs out
+        setPosts([]);
+        setHasMore(true);
+      }
+    }, [user])
+  );
+
+  const handleVideoPlay = useCallback((postId) => {
+    setAutoPlayEnabled((prev) => ({ ...prev, [postId]: false }));
+    setCurrentlyPlayingPostId((prev) => (prev === postId ? null : postId));
+  }, []);
+
+  const handleViewableItemsChanged = useCallback(
+    ({ viewableItems, changed }) => {
+      // Reset auto-play for items that leave view
+      changed.forEach(({ item, isViewable }) => {
+        if (!isViewable && item.file?.includes("postVideos")) {
+          setAutoPlayEnabled((prev) => {
+            const newState = { ...prev };
+            delete newState[item.id];
+            return newState;
+          });
+        }
+      });
+
+      // Find first eligible video to play
+      const firstVisibleVideo = viewableItems.find(
+        ({ item }) =>
+          item.file?.includes("postVideos") &&
+          (autoPlayEnabled[item.id] ?? true)
+      );
+
+      setCurrentlyPlayingPostId(firstVisibleVideo?.item.id || null);
+    },
+    [autoPlayEnabled]
+  );
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 70,
+    minimumViewTime: 300,
   };
 
-  /* Here, a state variable post is defined using useState. It will store the posts fetched from the database. Initially, it's an empty array because no data has been fetched yet. */
-  const [posts, setPosts] = useState([]); //write now its an empty array it will hlep to fetch the post for home screen form supabase
-  const [hasMore, setHasMore] = useState(true); // this has more is for if we scroll to end then apne ko kaise pata chalega aur post batach ha ki , kyu apna logic abhi tak tho bs fetch karta tha extra post irrespective of ki post aur ha ki ni tho ye fix karna h
-  const[notificationCount,setnotificationCount]=useState(0);
+  const handlePostEvent = useCallback(async (payload) => {
+    console.log("Post event payload:", payload);
 
-  const handlePostEvent = async (payload) => {
-    //!payload is the data sent by Supabase when a change (like adding a new post) occurs in the database. It contains the details of that change.
-    console.log(
-      "payload arre kya action hua kya delete ya insert ya update huaa uska id  : ",
-      payload
-    ); //all good sab sahi bs ek chiz ni aaraha user object but user id mill aa jara haa tho apan user id se user object nikallenga
-    if (payload.eventType == "INSERT" && payload?.new?.id) {
-      // This checks if the event type is 'INSERT' (i.e., a new post has been added).
-      // It also checks if payload.new.id exists, meaning there is a new post to process.
-      let newPost = { ...payload.new };
-      let res = await getUserData(newPost.userid); //  (newPosts)pataa ni khan apan ek jagah userId ke place mein userid likhe tho har jahag wahi use karna padh raha h
-      // res ke ander apna data nekal rahe h (name , profile, wagera) us user ka jisne post kiya h
+    if (payload.eventType === "INSERT" && payload?.new?.id) {
+      const newPost = { ...payload.new };
+      const res = await getUserData(newPost.userid);
       newPost.postLikes = [];
       newPost.comments = [{ count: 0 }];
       newPost.user = res.success ? res.data : {};
-      setPosts((prevPosts) => [newPost, ...prevPosts]);
-      // [newPost, ...prevPosts] This syntax is called array destructuring. It creates a new array by adding newPost at the beginning of the prevPosts array.
+      setPosts((prev) => [newPost, ...prev]);
     }
-    /* 
-    
-    below wt happning 
-    When a post is deleted (payload.eventType == "DELETE"),
-    this code filters out the deleted post from the current list
-    (prevPosts) using its id (payload.old.id (supabase keep tarack of that old id jiske uper action leya gaya h)), then updates the list to exclude that post. 
-    thats why we imidietly see the delete post is gone from (all posts list in home) */
+
     if (payload.eventType === "DELETE" && payload.old.id) {
-      // if event is delete and deleted item has valid id then
-      setPosts((prevPosts) => {
-        let updatedPosts = prevPosts.filter(
-          (post) => post.id !== payload.old.id
-          // (post) => post.id !== payload.old.id is a call back function (A callback is a function((post)=>....old.id) passed as an argument to another function, to be executed later.)
-        );
-        return updatedPosts;
-      });
+      setPosts((prev) => prev.filter((post) => post.id !== payload.old.id));
     }
-    if (payload.eventType == "UPDATE" && payload?.new?.id) {
-      // This checks if the event type is 'update' (i.e., a  post has been updated).
 
-      setPosts((prevPosts) => {
-        let updatedPosts = prevPosts.map((post) => {
-          if (post.id == payload.new.id) {
-            post.body = payload.new.body;
-            post.file = payload.new.file;
-          }
-          return post;
-        });
-        return updatedPosts;
-      });
-
-
-
+    if (payload.eventType === "UPDATE" && payload?.new?.id) {
+      setPosts((prev) =>
+        prev.map((post) =>
+          post.id === payload.new.id
+            ? { ...post, body: payload.new.body, file: payload.new.file }
+            : post
+        )
+      );
     }
-  };
-  const handleNewNotification = async (payload) => {  
-    console.log("new notification", payload);
-    if(payload.eventType=="INSERT" && payload?.new?.id){
-      setnotificationCount(prev=>prev+1);
+  }, []);
+
+  const handleNewNotification = useCallback((payload) => {
+    console.log("New notification payload:", payload);
+    if (payload.eventType === "INSERT" && payload?.new?.id) {
+      setnotificationCount((prev) => prev + 1);
     }
-  }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      // This runs when the screen gains focus
+      return () => {
+        // Cleanup when the screen loses focus: stop all videos
+        setCurrentlyPlayingPostId(null);
+      };
+    }, [])
+  );
 
   useEffect(() => {
-    // let commentChannel=supabase
-    // .channel('comments')
-    // .on('postgres_changes', { event: '*', schema: 'public', table: 'comments' })
-    // .subscribe();
+    if (!user) return;
 
-    let postChannel = supabase
+    const postChannel = supabase
       .channel("posts")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "posts" },
         handlePostEvent
       )
-      // postgres_changes is a special event in Supabase that listens for changes in a table (like inserts, updates, or deletes).
-      // on(ye hone mein , ye call kar do )
       .subscribe();
-    let notificationChannel = supabase
+
+    const notificationChannel = supabase
       .channel("notifications")
       .on(
         "postgres_changes",
-        { event: "INSERT", schema: "public", table: "notifications" ,filter: `receiverid=eq.${user.id}`},
-        handleNewNotification,
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `receiverid=eq.${user?.id}`,
+        },
+        handleNewNotification
       )
       .subscribe();
 
-
-    //4:24:36 time to know more for video
-    //useEffect: This hook runs after the component renders.
-    // getPosts();// we are already calling this function in onEndReached line mein so no need to call here c
     return () => {
       supabase.removeChannel(postChannel);
       supabase.removeChannel(notificationChannel);
-      // supabase.removeChannel(commentChannel);
-      // return () => { supabase.removeChannel(postChannel); }: When the component is unmounted (e.g., the user navigates away from this page), this removes the real-time channel to stop listening to changes, preventing unnecessary memory usage or errors.
+      setPosts([]);
+      setCurrentlyPlayingPostId(null);
     };
+  }, [user?.id, handlePostEvent, handleNewNotification]);
 
-    //Dependency Array []: Since the dependency array is empty, this hook runs only once when the component mounts.
-  }, []);
+  const getPosts = useCallback(async () => {
+    if (!hasMore) return;
+    limit += 5;
 
-  const getPosts = async () => {
-    // call the api here mane supabase walla api .form()  . select wagera wall function nothing rocket science
+    console.log("Fetching posts with limit:", limit);
+    const res = await fetchPosts(limit);
 
-    if (!hasMore) return null;
-    limit = limit + 5; // we will increase limit every time we end to bottom
-
-    console.log("fetching post: ", limit);
-    let res = await fetchPosts(limit);
-    // console.log('got Post result: ',res);
     if (res.success) {
-      if (posts.length == res.data.length) setHasMore(false);
-      // uper walla check kar rha ki aur post ha ki ni
+      setHasMore(posts.length !== res.data.length);
       setPosts(res.data);
     }
-  };
+  }, [hasMore, posts.length]);
+
+  const renderItem = useCallback(
+    ({ item }) => (
+      <MemoizedPostCard
+        item={item}
+        currentUser={user}
+        router={router}
+        currentlyPlayingPostId={currentlyPlayingPostId}
+        setCurrentlyPlayingPostId={setCurrentlyPlayingPostId}
+        onVideoPlay={handleVideoPlay}
+      />
+    ),
+    [user, router, currentlyPlayingPostId, handleVideoPlay]
+  );
+
+  const ListFooter = useMemo(
+    () =>
+      hasMore ? (
+        <View style={{ marginVertical: posts.length === 0 ? 275 : 30 }}>
+          <Loading />
+        </View>
+      ) : (
+        <View style={{ marginVertical: 30 }}>
+          <Text style={styles.noPosts}>No more posts</Text>
+        </View>
+      ),
+    [hasMore, posts.length]
+  );
 
   return (
-    <ScreenWrapper bg={"white"} paddingTop={"10"}>
-      {/* above paddding added by sonu , remove it if u want  */}
-      <View style={styles.container}>
-        {/* header */}
-        <View style={styles.header}>
-          <Text style={styles.title}>SimpleHub</Text>
-          <View style={styles.icons}>
-            <Pressable onPress={() => {
-              setnotificationCount(0);
-              router.push("./notifications")
-              }}>
-              <Icon
-                name="heart"
-                size={hp(3.2)}
-                strokeWidth={2}
-                color={theme.colors.text}
+    <ScreenWrapper bg={"white"} paddingTop={hp(2.5)}>
+      {/* Always render the same number of hooks.
+          If there is no user, render a placeholder (and the redirect effect will run). */}
+      {!user ? (
+        <View style={{ flex: 1 }} />
+      ) : (
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <Text style={styles.title}>SimpleHub</Text>
+            <View style={styles.icons}>
+              <Pressable
+                onPress={() => {
+                  setnotificationCount(0);
+                  router.push("./notifications");
+                }}
+              >
+                <Icon
+                  name="heart"
+                  size={hp(3.2)}
+                  strokeWidth={2}
+                  color={theme.colors.text}
                 />
-                {
-                  notificationCount>0 && (
-                    <View style={styles.pill}>
-                      <Text style={styles.pillText}>{notificationCount}</Text>
-                    </View>
-                   )
-                }
-            </Pressable>
-            <Pressable onPress={() => router.push("./newpost")}>
-              <Icon
-                name="plus"
-                size={hp(3.2)}
-                strokeWidth={2}
-                color={theme.colors.text}
-              />
-
-            </Pressable>
-            <Pressable onPress={() => router.push("./profile")}>
-              <Avatar
-                uri={user?.image}
-                size={hp(4.3)}
-                rounded={theme.radius.sm}
-                style={{ borderWidth: 2 }}
-              />
-            </Pressable>
+                {notificationCount > 0 && (
+                  <View style={styles.pill}>
+                    <Text style={styles.pillText}>{notificationCount}</Text>
+                  </View>
+                )}
+              </Pressable>
+              <Pressable onPress={() => router.push("./newpost")}>
+                <Icon
+                  name="plus"
+                  size={hp(3.2)}
+                  strokeWidth={2}
+                  color={theme.colors.text}
+                />
+              </Pressable>
+              <Pressable onPress={() => router.push("./profile")}>
+                <Avatar
+                  uri={user?.image}
+                  size={hp(4.3)}
+                  rounded={theme.radius.sm}
+                  style={{ borderWidth: 2 }}
+                />
+              </Pressable>
+            </View>
           </View>
+
+          <FlatList
+            initialNumToRender={10}
+            maxToRenderPerBatch={5}
+            windowSize={10}
+            removeClippedSubviews={true}
+            data={posts}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listStyle}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderItem}
+            onEndReached={getPosts}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={ListFooter}
+            updateCellsBatchingPeriod={100}
+            onViewableItemsChanged={handleViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+          />
         </View>
-        {/* posts  */}
-
-        <FlatList
-          initialNumToRender={10}
-          data={posts}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listStyle}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <PostCard
-              item={item}
-              currentUser={user}
-              router={router}
-              currentlyPlayingPostId={currentlyPlayingPostId}
-              onVideoPlay={handleVideoPlay}
-            />
-          )}
-          //! creating fucntion that  call get post when we rich end
-          onEndReached={() => {
-            console.log("got to the end");
-            getPosts();
-          }}
-          onEndReachedThreshold={0}
-          // that means jab last ke zero pixel mein pahuncho ge tho onendreached  hoga
-
-          ListFooterComponent={
-            hasMore ? (
-              <View style={{ marginVertical: posts.length == 0 ? 275 : 30 }}>
-                {/* 
-               kyu ek jab  initally home page load hoga( ya 0 post hoga ) tho loading screen top mein dekhega ajeeb lagega 
-               so we will do jab no post ho  es liye if posts zeor ha tho magin 200 warna 30  
-               //! after this part now very imp important part
-              now we do enable  realtime changes in supabase ( database > publication > initalaaly zero table seletect for realtime updation , now we select ( notification , post , and comment table to make it realtime))
-              also at last i diabled truncating event ( check se uncheckd kiya isko ) kyu ki ye ni chahye kuch delete ni karna h apne ko 
-           
-               //! now we make channel wichi listen posts in posts table ( doin this code after this getpostos funciton line  )
-               */}
-                <Loading />
-              </View>
-            ) : (
-              <View style={{ marginVertical: 30 }}>
-                <Text style={styles.noPosts}>No more posts</Text>
-              </View>
-            )
-          }
-        />
-      </View>
-      {/* <Button title="logout" onPress={onLogout} /> */}
-
-      {/*  <View style={styles.welcome}>
-        { <LottieView style={{ flex: 1 }} source={require('../../assets/images/welcome.json')} autoPlay loop /> }
-
-      </View> */}
+      )}
     </ScreenWrapper>
   );
 };
+
+// Memoized PostCard component to prevent unnecessary re-renders
+const MemoizedPostCard = memo(
+  PostCard,
+  (prev, next) =>
+    prev.item.id === next.item.id &&
+    prev.currentlyPlayingPostId === next.currentlyPlayingPostId &&
+    prev.item.body === next.item.body &&
+    prev.item.file === next.item.file &&
+    prev.item.postLikes?.length === next.item.postLikes?.length &&
+    prev.item.comments?.count === next.item.comments?.count &&
+    prev.setCurrentlyPlayingPostId === next.setCurrentlyPlayingPostId &&
+    prev.item.user?.image === next.item.user?.image
+);
 
 export default Home;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // paddingHorizontal: wp(4)
     marginTop: hp(-1.5),
   },
   welcome: {
@@ -339,7 +350,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 20,
-    backgroundColor: theme.colors.roseLight,
+    backgroundColor: theme.colors.notification,
   },
   pillText: {
     color: "white",

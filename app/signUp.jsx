@@ -13,7 +13,7 @@ import { supabase } from '../lib/supabase'
 import * as webBrowser from "expo-web-browser"
 import * as Google from "expo-auth-session/providers/google"
 import AsyncStorage from "@react-native-async-storage/async-storage"
-import { AndroidId, webId } from '../constants'
+// import { AndroidId, webId } from '../constants'
 
 webBrowser.maybeCompleteAuthSession();
 
@@ -23,10 +23,7 @@ webBrowser.maybeCompleteAuthSession();
 const SignUp = () => {
 
   const [userInfo, setUserInfo] = React.useState(null);
-  const [request, response, promptAsync] = Google.useAuthRequest({
-    androidClientId: AndroidId,
-    webClientId: null
-  });
+
 
   const router = useRouter();
   const emailRef = useRef("");
@@ -109,7 +106,6 @@ const SignUp = () => {
 
 
           {/* button for login */}
-          <Button title='SignIn with Google' onPress={()=>promptAsync()} />
           <Button title={'SignUp'} loading={loading} onPress={onSubmit} />
         </View>
         {/* footer */}

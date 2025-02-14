@@ -1,4 +1,4 @@
-import { Children, createContext, useState,useContext } from "react";
+import {createContext, useState,useContext } from "react";
 
 const AuthContext = createContext();
 
@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     const setAuth = (authUser) => {
       setUser(authUser);
     };
-  
+      
     // 3. Function to update the user state with new data.
     //    - Use spread syntax to keep existing properties of 'user' while 
     //      overriding them with the provided 'userData'.

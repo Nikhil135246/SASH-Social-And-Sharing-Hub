@@ -48,3 +48,25 @@ export const fetchNotifications = async (receiverId) => {
       return { success: false, msg: "Could not fetch the Notification" }; 
     }
   };
+
+
+  
+  // export const removeNotification = async (notificationId) => {
+  //   // this function recive postLike a object
+  //   try {
+  //     const { error } = await supabase
+  //       .from("notifications")
+  //       .delete()
+  //       .eq("id", notificationId) // supabase mein post table mein userId coloum ka naam mein i small ha is liye (userid likha here)
+        
+  
+  //     if (error) {
+  //       console.log("Notification Remove error", error);
+  //       return { success: false, msg: "Could not remove the Notifications" };
+  //     }
+  //     return { success: true };
+  //   } catch (error) {
+  //     console.log("Notification Remove error", error);
+  //     return { success: false, msg: "Could not remove the Notifications" };
+  //   }
+  // };

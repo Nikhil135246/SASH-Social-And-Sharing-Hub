@@ -9,10 +9,12 @@ import { theme } from "../../constants/theme";
 import { useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import Header from "../../components/Header";
+import Loading from "../../components/Loading";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -20,15 +22,22 @@ const Notifications = () => {
   }, []);
 
   const getNotifications = async () => {
-    let res = await fetchNotifications(user.id);
-    if (res.success) setNotifications(res.data);
-    console.log("Notifications", res);
+    setLoading(true);
+    try {
+      let res = await fetchNotifications(user.id);
+      if (res.success) setNotifications(res.data);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <ScreenWrapper>
       <View style={styles.container}>
       <Header title="Notifications"/>
+      {loading?(<Loading/>):(
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listStyle}
@@ -44,6 +53,7 @@ const Notifications = () => {
             )
           }
         </ScrollView>
+        )}
       </View>
     </ScreenWrapper>
   );

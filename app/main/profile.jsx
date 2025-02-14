@@ -51,19 +51,16 @@ const Profile = () => {
         }
       };
 
-  const onLogout = async () => {
-    // Clear the local authentication state
-    // setAuth(null); no need to setauth null cuase it been already null from that layoutpage 
-    setAuth(null);
-    // Attempt to sign out from Supabase
-    const { error } = await supabase.auth.signOut();
+const onLogout = async () => {
+  setAuth(null); // Clear the authentication state
+  const { error } = await supabase.auth.signOut(); // Sign out from Supabase
 
-    // Check if there was an error during sign out
-    if (error) {
-      // Display an error alert to the user
-      Alert.alert('Sign out', "Error signing out!");
-    }
-  };
+  if (error) {
+    Alert.alert('Sign out', "Error signing out!");
+  } else {
+    router.replace('welcome'); // Navigate to the login screen
+  }
+};
 
   const handleLogout = async () => {
     // Show confirm modal
