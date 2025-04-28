@@ -45,7 +45,7 @@ const MainLayout = () => {
       }
       else{
         setAuth(null);
-        router.replace('welcome');
+        router.replace('/welcome');
         //set auth to null 
         // move to welcom screen 
 
@@ -64,14 +64,7 @@ const MainLayout = () => {
       screenOptions={{
         headerShown: false, // Set header visibility to false
       }}
-    >
-      <Stack.Screen
-        name="main/postDetails"
-        options={{
-          presentation: 'modal',
-        
-        }}/> 
-    </Stack>
+    />
   );
 };
 

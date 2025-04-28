@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "SASH",
+    "name": "SASH-app",
     "slug": "SASH-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -16,11 +16,7 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.nik1214.SASHapp",
-      "permissions": [
-    "READ_EXTERNAL_STORAGE",
-    "WRITE_EXTERNAL_STORAGE"
-  ]
+      "package": "com.nik1214.SASHapp"
     },
     "web": {
       "bundler": "metro",
