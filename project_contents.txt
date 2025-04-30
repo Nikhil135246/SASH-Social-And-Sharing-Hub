@@ -47,8 +47,6 @@ SASH-app/
         common.js
     lib/
         supabase.js
-    scripts/
-        reset-project.js
     services/
         imageService.js
         notificationService.js
@@ -64,6 +62,7 @@ Project Files Content:
 
 # dependencies
 node_modules/
+
 # Expo
 .expo/
 dist/
@@ -134,7 +133,7 @@ yarn-error.*
 
 # local env files
 .env*.local
-
+/constants/index.js
 # typescript
 *.tsbuildinfo
 
@@ -591,6 +590,7 @@ module.exports = config;
     "@react-navigation/bottom-tabs": "^7.0.0",
     "@react-navigation/native": "^7.0.0",
     "@rneui/themed": "^4.0.0-rc.8",
+    "@shopify/flash-list": "^1.8.0",
     "@supabase/supabase-js": "^2.47.10",
     "base64-arraybuffer": "^1.0.2",
     "expo": "~52.0.20",
@@ -614,6 +614,8 @@ module.exports = config;
     "expo-system-ui": "~4.0.6",
     "expo-video": "~2.0.3",
     "expo-web-browser": "~14.0.1",
+    "lodash": "^4.17.21",
+    "lodash.debounce": "^4.0.8",
     "lottie-react-native": "^7.1.0",
     "moment": "^2.30.1",
     "patch-package": "^8.0.0",
@@ -622,6 +624,7 @@ module.exports = config;
     "react-native": "0.76.5",
     "react-native-gesture-handler": "~2.20.2",
     "react-native-pell-rich-editor": "^1.9.0",
+    "react-native-performance": "^5.1.2",
     "react-native-reanimated": "~3.16.1",
     "react-native-render-html": "^6.3.4",
     "react-native-safe-area-context": "4.12.0",
@@ -4154,6 +4157,7 @@ export const GoogleClientId = '436794015973-2mo0iluvu5lqonkg5uptde6s6natqm9r.app
 export const webId = '436794015973-2mo0iluvu5lqonkg5uptde6s6natqm9r.apps.googleusercontent.com';    
 export const AndroidId = '436794015973-ge8kijt1snbie5l1cde673d43iadsp5q.apps.googleusercontent.com';    
 
+
 --- D:\one drive\OneDrive\Desktop\sash-app\backup_sash\SASH-app\constants\theme.js ---
 export const theme = {
     colors: {
@@ -4270,93 +4274,6 @@ AppState.addEventListener('change', (state) => {
     supabase.auth.stopAutoRefresh()
   }
 })
-
---- D:\one drive\OneDrive\Desktop\sash-app\backup_sash\SASH-app\scripts\reset-project.js ---
-#!/usr/bin/env node
-
-/**
- * This script is used to reset the project to a blank state.
- * It moves the /app, /components, /hooks, /scripts, and /constants directories to /app-example and creates a new /app directory with an index.tsx and _layout.tsx file.
- * You can remove the `reset-project` script from package.json and safely delete this file after running it.
- */
-
-const fs = require("fs");
-const path = require("path");
-
-const root = process.cwd();
-const oldDirs = ["app", "components", "hooks", "constants", "scripts"];
-const newDir = "app-example";
-const newAppDir = "app";
-const newDirPath = path.join(root, newDir);
-
-const indexContent = `import { Text, View } from "react-native";
-
-export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
-}
-`;
-
-const layoutContent = `import { Stack } from "expo-router";
-
-export default function RootLayout() {
-  return <Stack />;
-}
-`;
-
-const moveDirectories = async () => {
-  try {
-    // Create the app-example directory
-    await fs.promises.mkdir(newDirPath, { recursive: true });
-    console.log(`📁 /${newDir} directory created.`);
-
-    // Move old directories to new app-example directory
-    for (const dir of oldDirs) {
-      const oldDirPath = path.join(root, dir);
-      const newDirPath = path.join(root, newDir, dir);
-      if (fs.existsSync(oldDirPath)) {
-        await fs.promises.rename(oldDirPath, newDirPath);
-        console.log(`➡️ /${dir} moved to /${newDir}/${dir}.`);
-      } else {
-        console.log(`➡️ /${dir} does not exist, skipping.`);
-      }
-    }
-
-    // Create new /app directory
-    const newAppDirPath = path.join(root, newAppDir);
-    await fs.promises.mkdir(newAppDirPath, { recursive: true });
-    console.log("\n📁 New /app directory created.");
-
-    // Create index.tsx
-    const indexPath = path.join(newAppDirPath, "index.tsx");
-    await fs.promises.writeFile(indexPath, indexContent);
-    console.log("📄 app/index.tsx created.");
-
-    // Create _layout.tsx
-    const layoutPath = path.join(newAppDirPath, "_layout.tsx");
-    await fs.promises.writeFile(layoutPath, layoutContent);
-    console.log("📄 app/_layout.tsx created.");
-
-    console.log("\n✅ Project reset complete. Next steps:");
-    console.log(
-      "1. Run `npx expo start` to start a development server.\n2. Edit app/index.tsx to edit the main screen.\n3. Delete the /app-example directory when you're done referencing it."
-    );
-  } catch (error) {
-    console.error(`Error during script execution: ${error}`);
-  }
-};
-
-moveDirectories();
-
 
 --- D:\one drive\OneDrive\Desktop\sash-app\backup_sash\SASH-app\services\imageService.js ---
 import * as FileSystem from 'expo-file-system'

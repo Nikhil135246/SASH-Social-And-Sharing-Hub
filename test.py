@@ -7,7 +7,7 @@ output_file = 'project_contents.txt'
 # Define folders and files to ignore
 ignore_dirs = {
     'node_modules', '.git', '.expo', '.qodo', '.vscode',
-    'build', 'dist', '__pycache__', 'android', 'patches', 'assets'
+    'build', 'dist', '__pycache__', 'android', 'patches', 'assets','scripts'
 }
 
 ignore_files = {
