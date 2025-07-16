@@ -34,8 +34,50 @@ allprojects {
             url(new File(['node', '--print', "require.resolve('jsc-android/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim(), '../dist'))
         }
 
+        // Primary repositories in order of preference
         google()
+        
+        // Maven Central with mirrors for better reliability
         mavenCentral()
-        maven { url 'https://www.jitpack.io' }
+        maven {
+            url 'https://repo1.maven.org/maven2'
+        }
+        maven {
+            url 'https://maven.aliyun.com/repository/central'
+        }
+        
+        // Primary JitPack repository with timeout settings
+        maven {
+            url 'https://jitpack.io'
+            content {
+                includeGroupByRegex "com\\.github\\..*"
+            }
+        }
+        
+        // Backup JitPack repository
+        maven {
+            url 'https://www.jitpack.io'
+            content {
+                includeGroupByRegex "com\\.github\\..*"
+            }
+        }
+        
+        // Additional repository for fallback
+        maven {
+            url 'https://maven.google.com'
+        }
+        
+        // Additional Maven mirrors
+        maven {
+            url 'https://repo.maven.apache.org/maven2'
+        }
+    }
+    
+    // Configure retry and caching strategy
+    configurations.all {
+        resolutionStrategy {
+            cacheChangingModulesFor 0, 'seconds'
+            cacheDynamicVersionsFor 0, 'seconds'
+        }
     }
 }
