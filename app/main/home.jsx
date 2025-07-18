@@ -52,9 +52,19 @@ const Home = () => {
         // Reset state when user logs out
         setPosts([]);
         setHasMore(true);
+        setCurrentlyPlayingPostId(null);
       }
     }, [user])
   );
+
+  // Cleanup memory on unmount
+  useEffect(() => {
+    return () => {
+      setPosts([]);
+      setCurrentlyPlayingPostId(null);
+      setAutoPlayEnabled({});
+    };
+  }, []);
 
   const handleVideoPlay = useCallback((postId) => {
     setAutoPlayEnabled((prev) => ({ ...prev, [postId]: false }));
@@ -171,14 +181,28 @@ const Home = () => {
 
   const getPosts = useCallback(async () => {
     if (!hasMore) return;
-    limit += 5;
+    
+    // Limit total posts to prevent memory issues
+    if (posts.length >= 50) {
+      setHasMore(false);
+      return;
+    }
+    
+    // Instead of increasing limit, use offset-based pagination
+    const newLimit = 3; // Reduced from 5 to 3 for memory
+    const offset = posts.length;
 
-    console.log("Fetching posts with limit:", limit);
-    const res = await fetchPosts(limit);
+    console.log("Fetching posts with limit:", newLimit, "offset:", offset);
+    const res = await fetchPosts(newLimit, offset);
 
     if (res.success) {
-      setHasMore(posts.length !== res.data.length);
-      setPosts(res.data);
+      if (res.data.length < newLimit) {
+        setHasMore(false);
+      }
+      // Append new posts instead of replacing all
+      setPosts(prev => [...prev, ...res.data]);
+    } else {
+      console.log("fetch post error", res.msg);
     }
   }, [hasMore, posts.length]);
 
@@ -259,21 +283,24 @@ const Home = () => {
           </View>
 
           <FlatList
-            initialNumToRender={10}
-            maxToRenderPerBatch={5}
-            windowSize={10}
+            initialNumToRender={3}
+            maxToRenderPerBatch={3}
+            windowSize={5}
             removeClippedSubviews={true}
+            disableVirtualization={false}
+            getItemLayout={undefined}
             data={posts}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listStyle}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderItem}
             onEndReached={getPosts}
-            onEndReachedThreshold={0.5}
+            onEndReachedThreshold={0.3}
             ListFooterComponent={ListFooter}
-            updateCellsBatchingPeriod={100}
+            updateCellsBatchingPeriod={200}
             onViewableItemsChanged={handleViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
+            legacyImplementation={false}
           />
         </View>
       )}

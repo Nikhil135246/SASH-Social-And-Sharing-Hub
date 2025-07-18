@@ -39,7 +39,7 @@ export const createOrUpdatePost = async (post) => {
   }
 };
 
-export const fetchPosts = async (limit = 10, userId) => {
+export const fetchPosts = async (limit = 10, offset = 0, userId) => {
   try {
     if (userId) {
       const { data, error } = await supabase
@@ -56,7 +56,7 @@ export const fetchPosts = async (limit = 10, userId) => {
         // postlike is liye fetch kiya ja raha ha taki jin user ne jisko like kiya h usko show bhi karna padega na
         .order("created_at", { ascending: false })
         .eq("userid", userId)
-        .limit(limit);
+        .range(offset, offset + limit - 1);
         if (error) {
             console.log("fetch post erro", error);
             return { success: false, msg: "Could not fetch the post" };
@@ -77,7 +77,7 @@ export const fetchPosts = async (limit = 10, userId) => {
         // ! and remember that never ever give comman in last like of selected items in .select(``)
         // postlike is liye fetch kiya ja raha ha taki jin user ne jisko like kiya h usko show bhi karna padega na
         .order("created_at", { ascending: false })
-        .limit(limit);
+        .range(offset, offset + limit - 1);
         if (error) {
           console.log("fetch post erro", error);
           return { success: false, msg: "Could not fetch the post" };

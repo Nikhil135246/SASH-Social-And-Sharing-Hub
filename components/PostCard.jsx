@@ -5,6 +5,7 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Linking,
 } from "react-native";
 import React, { useEffect, useState, useCallback, memo, useMemo } from "react";
 import { hp, stripHtmlTags, wp } from "../helpers/common";
@@ -112,22 +113,59 @@ const PostCard = memo(
       if (!res.success) Alert.alert("Post", "Something went wrong!");
     }, [liked, likes, currentUser?.id, item?.id]);
 
-    // Memoized share handler with file caching
+    // Memoized share handler that works with current development build
     const onShare = useCallback(async () => {
-      const content = { message: stripHtmlTags(item?.body) };
-
-      if (item?.file) {
-        setLoading(true);
-        try {
-          const url = await downloadFile(getSupabaseFileUrl(item?.file).uri);
-          content.url = url;
-        } catch (error) {
-          Alert.alert("Error", "File download failed.");
+      console.log('🔄 Share button clicked! Post ID:', item?.id);
+      console.log('📄 Post body:', item?.body);
+      console.log('🎬 Post file:', item?.file);
+      
+      try {
+        const postText = stripHtmlTags(item?.body);
+        
+        if (item?.file) {
+          console.log('📁 Post has file, creating shareable content...');
+          setLoading(true);
+          
+          try {
+            const fileUrl = getSupabaseFileUrl(item?.file).uri;
+            console.log('📎 File URL:', fileUrl);
+            
+            // Create a combined message with both text and image URL
+            const combinedMessage = `${postText || 'Check out this post from SASH! 🚀'}\n\n🖼️ View image: ${fileUrl}`;
+            
+            const shareOptions = {
+              message: combinedMessage,
+              title: 'Shared from SASH'
+            };
+            
+            console.log('📤 Sharing combined content:', shareOptions);
+            const result = await Share.share(shareOptions);
+            console.log('✅ Share result:', result);
+            
+            setLoading(false);
+            return;
+            
+          } catch (error) {
+            console.log('❌ Media sharing failed:', error);
+            setLoading(false);
+          }
         }
-        setLoading(false);
-      }
 
-      Share.share(content);
+        // Text-only sharing
+        console.log('📤 Sharing text only');
+        const textContent = { 
+          message: postText || 'Check out this post from SASH! 🚀',
+          title: 'Shared from SASH'
+        };
+        
+        const result = await Share.share(textContent);
+        console.log('✅ Text share result:', result);
+        
+      } catch (error) {
+        console.log('❌ Share failed:', error);
+        setLoading(false);
+        Alert.alert("Share Error", "Could not share this post. Please try again.");
+      }
     }, [item?.body, item?.file]);
 
     // Memoized delete confirmation dialog
@@ -280,7 +318,11 @@ const PostCard = memo(
             {loading ? (
               <Loading size="small" />
             ) : (
-              <TouchableOpacity onPress={onShare}>
+              <TouchableOpacity 
+                onPress={onShare} 
+                style={{ padding: 5 }}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
                 <Icon name="share" size={24} color={theme.colors.textLight} />
               </TouchableOpacity>
             )}

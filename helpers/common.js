@@ -8,3 +8,9 @@ export const hp = percentage => {
 export const wp = percentage => {
     return (percentage * deviceWidth) / 100;
   };
+
+// Strip HTML tags from text for sharing
+export const stripHtmlTags = (html) => {
+  if (!html) return '';
+  return html.replace(/<[^>]*>/g, '');
+};
