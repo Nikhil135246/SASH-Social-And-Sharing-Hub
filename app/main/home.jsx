@@ -12,6 +12,7 @@ import {
   StyleSheet,
   Text,
   View,
+  RefreshControl,
 } from "react-native";
 import ScreenWrapper from "../../components/ScreenWrapper";
 import { useAuth } from "../../context/AuthContext";
@@ -37,6 +38,7 @@ const Home = () => {
   const [hasMore, setHasMore] = useState(true);
   const [notificationCount, setnotificationCount] = useState(0);
   const [autoPlayEnabled, setAutoPlayEnabled] = useState({});
+  const [refreshing, setRefreshing] = useState(false);
 
   // Redirect to login if there is no user.
   useEffect(() => {
@@ -180,7 +182,7 @@ const Home = () => {
   }, [user?.id, handlePostEvent, handleNewNotification]);
 
   const getPosts = useCallback(async () => {
-    if (!hasMore) return;
+    if (!hasMore || refreshing) return;
     
     // Limit total posts to prevent memory issues
     if (posts.length >= 50) {
@@ -204,7 +206,36 @@ const Home = () => {
     } else {
       console.log("fetch post error", res.msg);
     }
-  }, [hasMore, posts.length]);
+  }, [hasMore, posts.length, refreshing]);
+
+  // Pull-to-refresh functionality with random order (Instagram-like)
+  const onRefresh = useCallback(async () => {
+    console.log("🔄 Pull to refresh triggered");
+    setRefreshing(true);
+    
+    try {
+      // Fetch fresh posts (more than usual for better randomization)
+      const res = await fetchPosts(20, 0); // Get 20 posts from start
+      
+      if (res.success) {
+        // Shuffle the posts for random order (Instagram-like)
+        const shuffledPosts = [...res.data].sort(() => Math.random() - 0.5);
+        
+        console.log("✅ Refresh successful, posts randomized");
+        setPosts(shuffledPosts);
+        setHasMore(true); // Reset hasMore for new pagination
+        
+        // Stop any currently playing video
+        setCurrentlyPlayingPostId(null);
+      } else {
+        console.log("❌ Refresh failed:", res.msg);
+      }
+    } catch (error) {
+      console.log("❌ Refresh error:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
 
   const renderItem = useCallback(
     ({ item }) => (
@@ -301,6 +332,17 @@ const Home = () => {
             onViewableItemsChanged={handleViewableItemsChanged}
             viewabilityConfig={viewabilityConfig}
             legacyImplementation={false}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={onRefresh}
+                colors={['#6366F1']} // Custom color for loading spinner
+                progressBackgroundColor="#ffffff"
+                tintColor="#6366F1" // iOS
+                title="Refreshing posts..." // iOS
+                titleColor="#6366F1" // iOS
+              />
+            }
           />
         </View>
       )}
